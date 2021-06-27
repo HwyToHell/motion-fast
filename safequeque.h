@@ -40,4 +40,5 @@ private:
     std::queue<T>       m_queue;
 };
 
+
 #endif // SAFEQUEUE_H
