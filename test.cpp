@@ -39,64 +39,16 @@ struct State
     char                    avoidPaddingWarning2[7];
 };
 
-class PacketBuffer // TODO delete, use classes of safebuffer.h
-{
-public:
-    PacketBuffer(size_t bufSize) : m_size(bufSize) {}
-
-    ~PacketBuffer()
-    {
-        while (m_buffer.size() > 0) {
-            av_packet_free(&m_buffer.front());
-            m_buffer.pop_front();
-        }
-    }
-
-    void push_back(AVPacket *elem)
-    {
-        m_buffer.push_back(elem);
-        if (m_buffer.size() > m_size) {
-            av_packet_free(&m_buffer.front());
-            m_buffer.pop_front();
-        }
-    }
-
-    AVPacket * front()
-    {
-        if (m_buffer.size() == 0) {
-            return nullptr;
-        } else {
-            return m_buffer.front();
-        }
-    }
-
-    void pop_front()
-    {
-        if (m_buffer.size() > 0) {
-            m_buffer.pop_front();
-        }
-    }
-
-    size_t size()
-    {
-        return m_buffer.size();
-    }
-private:
-    std::deque<AVPacket*> m_buffer;
-    size_t m_size;
-
-};
-
 
 // FUNCTIONS
 void statistics(std::vector<long long> samples, std::string name);
 
 // test av_packet_ref und av_packet_unref
-int testRef(const char * fileName)
+int testRefAVBuffer(const char * fileName)
 {
     LibavReader reader;
     reader.init();
-    PacketBuffer buffer(10); // TODO PacketSafeCircularBuffer
+    PacketSafeCircularBuffer buffer(10);
 
 
     int ret = reader.open(fileName);
@@ -120,7 +72,7 @@ int testRef(const char * fileName)
     State appState;
     appState.isMotion = false;
     appState.terminate = false;
-    SafeQueue<AVPacket*> decodeQueue;  // TODO PacketSafeQueue
+    PacketSafeQueue decodeQueue;  // TODO PacketSafeQueue
 
     cv::Mat img;
     bool succ = true;
@@ -128,38 +80,35 @@ int testRef(const char * fileName)
     int cnt = 0;
     // while (succ) {
     for (int i = 0; i<5; ++i) {
-        // measurement
-        if (!(succ = reader.readVideoPacket())) break;
-
-        AVPacket* packetDecoder = reader.cloneVideoPacket();
-        if(!packetDecoder) {
-            std::cout << "nullptr packet decoder -> break" << std::endl;
-            break;
-        }
-
-        //std::cout << "read packet " << cnt++ << ", pts: " << packetDecoder->pts << ", size: " << packetDecoder->size << std::endl;
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
-
-        AVPacket* packetMotionBuffer = reader.cloneVideoPacket();
-        if(!packetMotionBuffer) {
-            std::cout << "nullptr packet motion buffer -> break" << std::endl;
-            break;
-        }
-
-
-
+        // read packet for decoder
+        AVPacket* packetDecoder = nullptr;
+        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
+        decodeQueue.push(packetDecoder);
         std::cout   << "packet decoder " << i << std::endl
                     << "addr: " << static_cast<void*>(packetDecoder)
                     << ", size: " << packetDecoder->size
                     << ", refCnt: " << packetDecoder->buf->buffer->refcount << std::endl;
+        // getting the buffer ref_count via pointer requires a workaround: buffer_internal.h must be included
+        //   and atomic types changed to non-atomic ones in order to compile with c++
+        //   better solution: use av_buffer_get_ref_count() - see example below
 
+        //std::cout << "read packet " << cnt++ << ", pts: " << packetDecoder->pts << ", size: " << packetDecoder->size << std::endl;
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
+
+        // clone packet for pre-capture buffer
+        AVPacket* packetMotionBuffer = av_packet_clone(packetDecoder);
+        if(!packetMotionBuffer) {
+            std::cout << "nullptr packet motion buffer -> break" << std::endl;
+            break;
+        }
         std::cout   << "packet motion buffer " << i << std::endl
                     << "addr: " << static_cast<void*>(packetMotionBuffer)
                     << ", size: " << packetMotionBuffer->size
-                    << ", refCnt: " << packetMotionBuffer->buf->buffer->refcount << std::endl;
+                    << ", refCntFn: " << av_buffer_get_ref_count(packetMotionBuffer->buf) << std::endl;
 
-        buffer.push_back(std::move(packetMotionBuffer));
-        decodeQueue.push(std::move(packetDecoder));
+
+        buffer.push(packetMotionBuffer);
+
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
         appState.newPacket = true;
         appState.newPacketCnd.notify_one();
@@ -172,6 +121,10 @@ int testRef(const char * fileName)
         std::this_thread::sleep_for(std::chrono::milliseconds(40));
 
     }
+    // mit readVideoPacket2() nicht erforderlich
+    // AVPacket* pkt = reader.getVideoPacket();
+    // av_packet_unref(pkt);
+
     std::cout << "finished reading" << std::endl;
 
     std::cout << "motion buffer size: " << buffer.size() << std::endl;
@@ -195,26 +148,22 @@ int testRef(const char * fileName)
 
         //av_packet_unref(packetDecode);
         av_packet_free(&packetDecode);
-
-        AVPacket* packetBuffer = buffer.front();
-
-        std::cout   << "freed addr: " << static_cast<void*>(packetDecode) << std::endl;
     }
 
 
     // pop pre-capture buffer
-    nSize = buffer.size();
-    for (size_t n = 0; n < nSize; ++n) {
-        AVPacket* packetBuffer = buffer.front();
-        std::cout   << "packet motion buffer " << n << std::endl
+    cnt = 0;
+    AVPacket* packetBuffer = nullptr;
+    while (buffer.pop(packetBuffer)) {
+        std::cout   << "packet motion buffer " << cnt << std::endl
                     << "addr: " << static_cast<void*>(packetBuffer)
                     << ", size: " << packetBuffer->size
                     << ", refCnt: " << packetBuffer->buf->buffer->refcount << std::endl;
-        buffer.pop_front();
 
         //av_packet_unref(packetBuffer);
         av_packet_free(&packetBuffer);
         std::cout   << "freed addr: " << static_cast<void*>(packetBuffer) << std::endl;
+        ++cnt;
     }
 
     return 0;
@@ -328,7 +277,7 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    testRef(argv[1]);
+    testRefAVBuffer(argv[1]);
     return 0;
 
     // performance measurement
@@ -342,7 +291,7 @@ int main(int argc, const char *argv[])
 
     LibavReader reader;
     reader.init();
-    PacketBuffer buffer(250);
+    PacketSafeCircularBuffer buffer(250);
 
 
     int ret = reader.open(argv[1]);

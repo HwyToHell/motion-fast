@@ -104,6 +104,31 @@ AVRational LibavReader::frameRate()
 }
 
 
+AVCodecParameters* LibavReader::getVideoCodecParams()
+{
+    if (idxVideoStream >= 0) {
+        return (ic->streams[idxVideoStream]->codecpar);
+    } else {
+        return nullptr;
+    }
+}
+
+
+AVPacket* LibavReader::getVideoPacket()
+{
+    return packet;
+}
+
+
+VideoTiming LibavReader::getVideoTiming()
+{
+    VideoTiming timing;
+    timing.frameRate = idxVideoStream >= 0 ? av_stream_get_r_frame_rate(ic->streams[idxVideoStream]) : AVRational {0,0};
+    timing.timeBase = idxVideoStream >= 0 ? ic->streams[idxVideoStream]->time_base : AVRational {0,0};
+    return timing;
+}
+
+
 int LibavReader::open(std::string fileName)
 {
     int ret = -1;
@@ -205,6 +230,31 @@ bool LibavReader::readVideoPacket()
 }
 
 
+bool LibavReader::readVideoPacket2(AVPacket*& pkt)
+{
+    pkt = nullptr;
+    int ret = -1;
+    // read videostream only
+    for (unsigned int i = 0; i < ic->nb_streams; i++) {
+        ret = av_read_frame(ic, packet);
+        if (ret == AVERROR_EOF) {
+            std::cout << "end of file" << std::endl;
+            return false;
+        } else if (ret < 0) {
+            avErrMsg("Failed to read packet", ret);
+            return false;
+        }
+
+        if (packet->stream_index == idxVideoStream) {
+            pkt = av_packet_clone(packet);
+            av_packet_unref(packet);
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool LibavReader::retrieveFrame(cv::Mat& image)
 {
     if (!frame->width || !frame->height) {
@@ -223,15 +273,6 @@ AVRational LibavReader::timeBase()
         return (ic->streams[idxVideoStream]->time_base);
     } else {
         return AVRational {0,0};
-    }
-}
-
-AVCodecParameters* LibavReader::videoCodecParams()
-{
-    if (idxVideoStream >= 0) {
-        return (ic->streams[idxVideoStream]->codecpar);
-    } else {
-        return nullptr;
     }
 }
 

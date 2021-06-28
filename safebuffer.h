@@ -18,7 +18,7 @@ bool isKeyFrame(AVPacket* packet)
 class PacketSafeCircularBuffer
 {
 public:
-    PacketSafeCircularBuffer(size_t bufSize) : m_size(bufSize) {}
+    PacketSafeCircularBuffer(size_t bufSize) : m_capacity(bufSize) {}
 
     ~PacketSafeCircularBuffer()
     {
@@ -59,7 +59,7 @@ public:
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         m_queue.push(std::move(packet));
-        if (m_queue.size() > m_size) {
+        if (m_queue.size() > m_capacity) {
             av_packet_free(&m_queue.front());
             m_queue.pop();
         }
@@ -74,7 +74,7 @@ public:
 private:
     mutable std::mutex      m_mtx;
     std::queue<AVPacket*>   m_queue;
-    size_t                  m_size;
+    size_t                  m_capacity;
 
 };
 
@@ -93,7 +93,7 @@ public:
         }
     }
 
-    bool pop(AVPacket* packet)
+    bool pop(AVPacket*& packet)
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         if (m_queue.empty()) {

@@ -18,6 +18,12 @@ void errLog(const char * file, int line, std::string msg, int error = 0);
 #define avErrMsg( msg, ... ) errLog( __FILE__, __LINE__, msg, ##__VA_ARGS__ )
 
 
+struct VideoTiming
+{
+    AVRational  frameRate;
+    AVRational  timeBase;
+};
+
 
 class LibavReader
 {
@@ -28,12 +34,15 @@ public:
     void                close();
     bool                decodePacket(AVPacket* packet);
     AVRational          frameRate();
+    AVCodecParameters*  getVideoCodecParams();
+    AVPacket*           getVideoPacket();
+    VideoTiming         getVideoTiming();
     int                 init();
     int                 open(std::string file);
     bool                readVideoPacket();
+    bool                readVideoPacket2(AVPacket*& pkt);
     bool                retrieveFrame(cv::Mat& frame);
     AVRational          timeBase();
-    AVCodecParameters*  videoCodecParams();
 private:
     AVCodec             *codec;
     AVCodecContext      *codecCtx;
