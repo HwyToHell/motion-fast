@@ -45,6 +45,107 @@ void statistics(std::vector<long long> samples, std::string name);
 
 
 // test new decoder
+int testNewDecoder(const char * fileName)
+{
+    LibavReader reader;
+    reader.init();
+    PacketSafeCircularBuffer buffer(100);
+
+    int ret = reader.open(fileName);
+    if (ret < 0) {
+        std::cout << "Error opening file: " << fileName << std::endl;
+        return -1;
+    }
+
+    LibavDecoder decoder;
+    AVCodecParameters* codecParams = reader.getVideoCodecParams();
+    decoder.open(codecParams);
+
+    // states for motion detection thread
+    State appState;
+    appState.isMotion = false;
+    appState.terminate = false;
+    PacketSafeQueue decodeQueue;
+
+    bool succ = true;
+    int cnt = 0;
+
+    while (succ) {
+    //for (cnt = 0; cnt<5; ++cnt) {
+        // read packet for decoder
+        AVPacket* packetDecoder = nullptr;
+        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
+        decodeQueue.push(packetDecoder);
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
+
+        // clone packet for pre-capture buffer
+        AVPacket* packetMotionBuffer = av_packet_clone(packetDecoder);
+        if(!packetMotionBuffer) {
+            std::cout << "nullptr packet motion buffer -> break" << std::endl;
+            break;
+        }
+        buffer.push(packetMotionBuffer);
+
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
+        appState.newPacket = true;
+        appState.newPacketCnd.notify_one();
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet " << cnt << " wait notified");
+
+        ++cnt;
+    }
+    std::cout << "finished reading " << cnt << " packets" << std::endl;
+    std::cout << "motion buffer size: " << buffer.size() << std::endl;
+    std::cout << "decode queue size:  " << decodeQueue.size() << std::endl;
+
+    // prepare opencv windows
+    cv::namedWindow("frame", cv::WINDOW_NORMAL);
+    cv::resizeWindow("frame", cv::Size(950, 500) );
+    cv::moveWindow("frame", 0, 0);
+    cv::Mat frame;
+
+    // pop decode queue
+    size_t nSize = decodeQueue.size();
+    succ = true;
+    cnt = 0;
+    std::cout << "ESC to break" << std::endl;
+    while (succ) {
+    //for (size_t n = 0; n < nSize; ++n) {
+        AVPacket* packetDecode = nullptr;
+        if (!decodeQueue.pop(packetDecode)) {
+            std::cout << "Failed to pop decode packet" << std::endl;
+            break;
+        } else {
+            // decode
+            if (!decoder.decodePacket(packetDecode)) {
+                std::cout << "Failed to decode packet for motion detection" << std::endl;
+            }
+            av_packet_free(&packetDecode);
+
+            // get opencv image
+            if (!decoder.retrieveFrame(frame)) {
+                std::cout << "Failed to retrieve frame for motion detection" << std::endl;
+            }
+            cv::imshow("frame", frame);
+            ++cnt;
+            if (cv::waitKey(20) == 27)
+                break;
+        }
+    }
+    cv::destroyAllWindows();
+
+    // pop pre-capture buffer
+    cnt = 0;
+    AVPacket* packetBuffer = nullptr;
+    while (buffer.pop(packetBuffer)) {
+        av_packet_free(&packetBuffer);
+        ++cnt;
+    }
+
+    return 0;
+}
+
+
+
 
 // test av_packet_ref und av_packet_unref with old LiabavReader
 int testRefAVBuffer(const char * fileName)
@@ -75,7 +176,7 @@ int testRefAVBuffer(const char * fileName)
     State appState;
     appState.isMotion = false;
     appState.terminate = false;
-    PacketSafeQueue decodeQueue;  // TODO PacketSafeQueue
+    PacketSafeQueue decodeQueue;
 
     cv::Mat img;
     bool succ = true;
@@ -280,7 +381,8 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    testRefAVBuffer(argv[1]);
+    //testRefAVBuffer(argv[1]);
+    testNewDecoder(argv[1]);
     return 0;
 
     // performance measurement
