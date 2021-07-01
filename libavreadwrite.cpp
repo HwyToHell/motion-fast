@@ -20,6 +20,111 @@ void errLog(const char * file, int line, std::string msg, int avError)
 }
 
 
+
+/*** LibavDecoder ************************************************************/
+LibavDecoder::LibavDecoder() :
+    m_codec(nullptr),
+    m_codecCtx(nullptr),
+    m_codecParams(nullptr),
+    m_frame(nullptr)
+{
+    avcodec_register_all();
+}
+
+
+LibavDecoder::~LibavDecoder()
+{
+    // =dealloc private vars
+    close();
+}
+
+
+void LibavDecoder::close()
+{
+
+    av_frame_free(&m_frame);
+
+    // free open or closed codecs
+    // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gaf869d0829ed607cec3a4a02a1c7026b3
+    avcodec_free_context(&m_codecCtx);
+}
+
+
+bool LibavDecoder::decodePacket(AVPacket* packet)
+{
+    int ret = avcodec_send_packet(m_codecCtx, packet);
+    if (ret < 0) {
+        avErrMsg("Failed to send packet to decoder", ret);
+        return false;
+    }
+
+    ret = avcodec_receive_frame(m_codecCtx, m_frame);
+    if (ret == 0) {
+        return true; // frame available
+    } else if (ret != AVERROR(EAGAIN)) {
+        avErrMsg("Failed to receive frame from decoder", ret);
+        return false;
+    }
+
+    return false; // no frame was returned, read next packet
+}
+
+
+int LibavDecoder::open(AVCodecParameters* vCodecParams)
+{
+    m_codecParams = vCodecParams;
+    int ret = -1;
+
+    m_codec = avcodec_find_decoder(m_codecParams->codec_id);
+    if (!m_codec) {
+        avErrMsg("Unsupported codec");
+        return ret;
+    }
+
+    m_codecCtx = avcodec_alloc_context3(m_codec);
+    if (!m_codecCtx) {
+        avErrMsg("Failed to allocate memory for AVCodecContext");
+        return ret;
+    }
+
+    ret = avcodec_parameters_to_context(m_codecCtx, m_codecParams);
+    if (ret < 0) {
+        avErrMsg("Failed to copy codec params to codec context", ret);
+        avcodec_free_context(&m_codecCtx);
+        return ret;
+    }
+
+    ret = avcodec_open2(m_codecCtx, m_codec, nullptr);
+    if (ret < 0) {
+        avErrMsg("Failed to open codec", ret);
+        avcodec_free_context(&m_codecCtx);
+        return ret;
+    }
+
+    m_frame = av_frame_alloc();
+    if (!m_frame) {
+        avErrMsg("Failed to allocate memory for AVFrame");
+        avcodec_free_context(&m_codecCtx);
+        return -1;
+    }
+
+    return 0;
+}
+
+
+bool LibavDecoder::retrieveFrame(cv::Mat& grayImage)
+{
+    if (!m_frame->width || !m_frame->height) {
+        return false;
+    } else {
+        cv::Size frameSize(m_frame->width, m_frame->height);
+        grayImage = cv::Mat(frameSize, CV_8UC1, m_frame->data[0]);
+        return true;
+    }
+}
+
+
+
 /*** LibavReader *************************************************************/
 
 LibavReader::LibavReader() :
@@ -36,14 +141,6 @@ LibavReader::LibavReader() :
 LibavReader::~LibavReader()
 {
     close();
-}
-
-
-int LibavReader::init()
-{
-    av_register_all();
-
-    return 0;
 }
 
 
@@ -129,6 +226,14 @@ VideoTiming LibavReader::getVideoTiming()
 }
 
 
+int LibavReader::init()
+{
+    av_register_all();
+
+    return 0;
+}
+
+
 int LibavReader::open(std::string fileName)
 {
     int ret = -1;
@@ -170,6 +275,7 @@ int LibavReader::open(std::string fileName)
         return ret;
     }
 
+    // TODO move to decoder
     // get codec context and open codec
     codecCtx = avcodec_alloc_context3(codec);
     if (!codecCtx) {

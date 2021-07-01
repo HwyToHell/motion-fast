@@ -43,7 +43,10 @@ struct State
 // FUNCTIONS
 void statistics(std::vector<long long> samples, std::string name);
 
-// test av_packet_ref und av_packet_unref
+
+// test new decoder
+
+// test av_packet_ref und av_packet_unref with old LiabavReader
 int testRefAVBuffer(const char * fileName)
 {
     LibavReader reader;

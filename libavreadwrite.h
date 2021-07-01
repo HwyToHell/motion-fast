@@ -25,6 +25,22 @@ struct VideoTiming
 };
 
 
+class LibavDecoder
+{
+public:
+    LibavDecoder();
+    ~LibavDecoder();
+    void                close();
+    bool                decodePacket(AVPacket* packet);
+    int                 open(AVCodecParameters* vCodecParams);
+    bool                retrieveFrame(cv::Mat& grayImage);
+private:
+    AVCodec             *m_codec;
+    AVCodecContext      *m_codecCtx;
+    AVCodecParameters   *m_codecParams;
+    AVFrame             *m_frame;
+};
+
 class LibavReader
 {
 public:
@@ -35,14 +51,14 @@ public:
     bool                decodePacket(AVPacket* packet);
     AVRational          frameRate();
     AVCodecParameters*  getVideoCodecParams();
-    AVPacket*           getVideoPacket();
+    AVPacket*           getVideoPacket();  // TODO delete
     VideoTiming         getVideoTiming();
     int                 init();
     int                 open(std::string file);
-    bool                readVideoPacket();
+    bool                readVideoPacket(); // TODO delete
     bool                readVideoPacket2(AVPacket*& pkt);
     bool                retrieveFrame(cv::Mat& frame);
-    AVRational          timeBase();
+    AVRational          timeBase(); // TODO delete
 private:
     AVCodec             *codec;
     AVCodecContext      *codecCtx;
