@@ -27,24 +27,58 @@ typedef std::chrono::time_point<std::chrono::system_clock> TimePoint;
 
 
 // CLASSES
+struct Motion
+{
+    bool                    start;
+    std::condition_variable startCnd;
+    std::mutex              startMtx;
+    std::atomic_bool        stop;
+    int                     postCapture;
+    bool                    writeInProgress;
+};
+
+struct VideoStream
+{
+    AVCodecParameters*      videoCodecParameters;
+    AVRational              frameRate;
+    AVRational              timeBase;
+};
+
 struct State
 {
-    std::atomic_bool        isMotion;
-    std::atomic_bool        isVideoSourceRunning;
-    bool                    newPacket;
-    char                    avoidPaddingWarning1[5];
-    std::condition_variable newPacketCnd;
-    std::mutex              newPacketMtx;
-    std::atomic_bool        terminate;
-    char                    avoidPaddingWarning2[7];
+    bool                    terminate;
+    Motion                  motion;
+    VideoStream             streamInfo;
 };
+
+struct StateOld
+{
+    std::atomic_bool        isVideoSourceRunning;
+    char                    avoidPaddingWarning1[6];
+    bool                    motionStart; // TODO delete -> Motion
+    std::atomic_bool        motionStop; // TODO delete -> Motion
+    char                    avoidPaddingWarning2[7];
+    std::condition_variable motionCnd; // TODO delete -> Motion
+    std::mutex              motionMtx; // TODO delete -> Motion
+    bool                    newPacket; // TODO -> DecodeQueue
+    char                    avoidPaddingWarning3[7];
+    std::condition_variable newPacketCnd; // TODO -> DecodeQueue
+    std::mutex              newPacketMtx; // TODO -> DecodeQueue
+    int                     postCapture;  // TODO delete
+    std::atomic_bool        terminate;
+    char                    avoidPaddingWarning4[3];
+    VideoTiming             timing; // TODO delete -> VideoStreamInfo
+    AVCodecParameters*      videoCodecParameters; // TODO delete -> VideoStreamInfo
+};
+
+
 
 
 // FUNCTIONS
 void statistics(std::vector<long long> samples, std::string name);
 
 
-// test new decoder
+// test new decoder 2021-07-01
 int testNewDecoder(const char * fileName)
 {
     LibavReader reader;
@@ -62,8 +96,8 @@ int testNewDecoder(const char * fileName)
     decoder.open(codecParams);
 
     // states for motion detection thread
-    State appState;
-    appState.isMotion = false;
+    StateOld appState;
+    appState.motionStart = false;
     appState.terminate = false;
     PacketSafeQueue decodeQueue;
 
@@ -79,12 +113,12 @@ int testNewDecoder(const char * fileName)
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
 
         // clone packet for pre-capture buffer
-        AVPacket* packetMotionBuffer = av_packet_clone(packetDecoder);
-        if(!packetMotionBuffer) {
+        AVPacket* packetPreCaptureBuffer = av_packet_clone(packetDecoder);
+        if(!packetPreCaptureBuffer) {
             std::cout << "nullptr packet motion buffer -> break" << std::endl;
             break;
         }
-        buffer.push(packetMotionBuffer);
+        buffer.push(packetPreCaptureBuffer);
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
         appState.newPacket = true;
@@ -104,7 +138,7 @@ int testNewDecoder(const char * fileName)
     cv::Mat frame;
 
     // pop decode queue
-    size_t nSize = decodeQueue.size();
+    // size_t nSize = decodeQueue.size();
     succ = true;
     cnt = 0;
     std::cout << "ESC to break" << std::endl;
@@ -147,7 +181,7 @@ int testNewDecoder(const char * fileName)
 
 
 
-// test av_packet_ref und av_packet_unref with old LiabavReader
+// test av_packet_ref und av_packet_unref with old LiabavReader 2021-06-28
 int testRefAVBuffer(const char * fileName)
 {
     LibavReader reader;
@@ -173,8 +207,8 @@ int testRefAVBuffer(const char * fileName)
     }
 
     // motion detection thread
-    State appState;
-    appState.isMotion = false;
+    StateOld appState;
+    appState.motionStart = false;
     appState.terminate = false;
     PacketSafeQueue decodeQueue;
 
@@ -200,18 +234,18 @@ int testRefAVBuffer(const char * fileName)
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
 
         // clone packet for pre-capture buffer
-        AVPacket* packetMotionBuffer = av_packet_clone(packetDecoder);
-        if(!packetMotionBuffer) {
+        AVPacket* packetPreCaptureBuffer = av_packet_clone(packetDecoder);
+        if(!packetPreCaptureBuffer) {
             std::cout << "nullptr packet motion buffer -> break" << std::endl;
             break;
         }
         std::cout   << "packet motion buffer " << i << std::endl
-                    << "addr: " << static_cast<void*>(packetMotionBuffer)
-                    << ", size: " << packetMotionBuffer->size
-                    << ", refCntFn: " << av_buffer_get_ref_count(packetMotionBuffer->buf) << std::endl;
+                    << "addr: " << static_cast<void*>(packetPreCaptureBuffer)
+                    << ", size: " << packetPreCaptureBuffer->size
+                    << ", refCntFn: " << av_buffer_get_ref_count(packetPreCaptureBuffer->buf) << std::endl;
 
 
-        buffer.push(packetMotionBuffer);
+        buffer.push(packetPreCaptureBuffer);
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
         appState.newPacket = true;
@@ -275,27 +309,30 @@ int testRefAVBuffer(const char * fileName)
 
 
 
-// TODO thread func -> decode, bgrsub, notify
-int detectMotionCnd(LibavReader& reader, SafeQueue<AVPacket*>& packets, State& state)
+// test motion detection thread func -> decode, bgrsub, notify 2021-07-03
+int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
 {
+    LibavDecoder decoder;
+    int ret = decoder.open(appState.streamInfo.videoCodecParameters);
+    if (ret < 0){
+        avErrMsg("Failed to open codec", ret);
+        return ret;
+    }
     AVPacket* packet = nullptr;
     cv::Mat frame;
 
-    std::cout << "terminate == false? " << (state.terminate == false) << std::endl;
-    while (state.terminate == false) {
-        {
-            std::unique_lock<std::mutex> lock(state.newPacketMtx);
-            state.newPacketCnd.wait(lock, [&]{return state.newPacket;});
-            state.newPacket = false;
-        }
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet wait finished");
-
-        // decode queued packets
+    while (!appState.terminate) {
+        // decode queued packets, if new packets are available
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", waiting for new packet");
+        packetQueue.waitForNewPacket();
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet notified");
+        if (appState.terminate) break;
         int cntDecoded = 0;
-        while (packets.pop(packet)) {
+        while (packetQueue.pop(packet)) {
             std::cout << "packet " << cntDecoded << " popped, pts: " << packet->pts << ", size: " << packet->size << std::endl;
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet popped");
-            if (!reader.decodePacket(packet)) {
+            if (appState.terminate) break;
+            if (!decoder.decodePacket(packet)) {
                 std::cout << "Failed to decode packet for motion detection" << std::endl;
             }
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded");
@@ -306,7 +343,7 @@ int detectMotionCnd(LibavReader& reader, SafeQueue<AVPacket*>& packets, State& s
         }
 
         // retrieve last frame
-        if (!reader.retrieveFrame(frame)) {
+        if (!decoder.retrieveFrame(frame)) {
             std::cout << "Failed to retrieve frame for motion detection" << std::endl;
         }
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved");
@@ -316,6 +353,7 @@ int detectMotionCnd(LibavReader& reader, SafeQueue<AVPacket*>& packets, State& s
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", motion detection finished");
 
     }
+    av_packet_free(&packet);
     return 0;
 }
 
@@ -359,19 +397,107 @@ int detectMotion(LibavReader& reader, SafeQueue<AVPacket*>& packets, State& stat
             std::cout << "Failed to retrieve frame for motion detection" << std::endl;
         }
         // detect motion
-        state.isMotion = detector.isContinuousMotion(frame);
+        state.motion.start = detector.isContinuousMotion(frame);
 
         cv::imshow("frame", frame);
         cv::imshow("motion_mask", detector.motionMask());
         std::cout << "ESC to continue" << std::endl;
         cv::waitKey(0);
-        std::cout << "decoded: " << cntDecoded << ", motion: " << state.isMotion << std::endl;
+        std::cout << "decoded: " << cntDecoded << ", motion: " << state.motion.start << std::endl;
     //}
 
     cv::destroyAllWindows();
 
     return 0;
 }
+
+
+int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
+{
+    enum class State
+    {
+        waitForMotion,
+        open,
+        write,
+        writePostCapture,
+        close
+    };
+
+    State writeState = State::waitForMotion;
+    LibavWriter writer;
+    int postCapture = appState.motion.postCapture;
+
+    while (!appState.terminate) {
+        switch (writeState) {
+
+        case State::waitForMotion:
+        {
+            // wait for motion condition
+            std::unique_lock<std::mutex> lock(appState.motion.startMtx);
+            appState.motion.startCnd.wait(lock, [&]{return appState.motion.start;});
+            appState.motion.start = false;
+            writeState = State::open;
+            break;
+        }
+        case State::open:
+        {
+            // open writer // TODO - use time stamp for file name
+            int ret = writer.open("out.mp4", appState.streamInfo.videoCodecParameters);
+            if (ret < 0) {
+                avErrMsg("Failed to open output file", ret);
+                appState.terminate = true;
+                break;
+            }
+            // find keyframe
+            AVPacket* packet;
+            if (!buffer.popToNextKeyFrame(packet)) {
+                std::cout << "no key frame found -> close output file" << std::endl;
+                writeState = State::close;
+            };
+            while(buffer.pop(packet)) {
+                writer.writeVideoPacket(packet);
+            }
+            writeState = State::write;
+            break;
+        }
+        case State::write:
+        {
+            buffer.waitForNewPacket();
+            AVPacket* packet;
+            while(buffer.pop(packet)) {
+                writer.writeVideoPacket(packet);
+            }
+            // if no motion -> writePostCapture
+            if (appState.motion.stop.load()) {
+                postCapture = appState.motion.postCapture;
+                writeState = State::writePostCapture;
+            }
+            break;
+        }
+        case State::writePostCapture:
+        {
+            buffer.waitForNewPacket();
+            AVPacket* packet;
+            while(buffer.pop(packet)) {
+                writer.writeVideoPacket(packet);
+                --postCapture;
+                if ((postCapture == 0) || appState.terminate) {
+                    writer.close();
+                    // reset writePacketsRunning
+                    writeState = State::waitForMotion;
+                    break;
+                }
+            }
+            break;
+        }
+
+        } // end switch
+    } // end while (!terminate)
+    return 0;
+}
+
+
+
 
 
 int main(int argc, const char *argv[])
@@ -382,22 +508,20 @@ int main(int argc, const char *argv[])
     }
 
     //testRefAVBuffer(argv[1]);
-    testNewDecoder(argv[1]);
-    return 0;
+    //testNewDecoder(argv[1]);
+    //return 0;
 
     // performance measurement
     TimePoint readStart, readEnd;
     TimePoint decodeStart, decodeEnd;
-    TimePoint writeStart, writeEnd;
+    // TimePoint writeStart, writeEnd;
     std::vector<long long> readTimes;
     std::vector<long long> decodeTimes;
     std::vector<long long> writeTimes;
 
-
     LibavReader reader;
     reader.init();
-    PacketSafeCircularBuffer buffer(250);
-
+    PacketSafeCircularBuffer preCaptureBuffer(250);
 
     int ret = reader.open(argv[1]);
     if (ret < 0) {
@@ -405,50 +529,50 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    AVRational timeBase = reader.timeBase();
-    if (timeBase.den == 0) {
+    // prepare for motion detection thread
+    State appState;
+    appState.motion.start = false;
+    appState.terminate = false;
+    appState.streamInfo.videoCodecParameters = reader.getVideoCodecParams();
+    appState.streamInfo.timeBase = reader.timeBase();
+    if (appState.streamInfo.timeBase.den == 0) {
         std::cout << "Failed to get time base: " << std::endl;
         return -1;
     }
-    AVRational fps = reader.frameRate();
-    if (fps.den == 0) {
+    appState.streamInfo.frameRate = reader.frameRate();
+    if (appState.streamInfo.frameRate.den == 0) {
         std::cout << "Failed to get fps: " << std::endl;
         return -1;
     }
-
-    // motion detection thread
-    State appState;
-    appState.isMotion = false;
-    appState.terminate = false;
-    SafeQueue<AVPacket*> decodeQueue;
-    std::thread threadMotion(detectMotionCnd, std::ref(reader), std::ref(decodeQueue), std::ref(appState));
+    PacketSafeQueue decodeQueue;
+    std::thread threadMotion(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));
 
     cv::Mat img;
     bool succ = true;
-    std::cout << "press <ESC> to exit video processing" << std::endl;
     int cnt = 0;
-    while (succ) {
-    //for (int i = 0; i<5; ++i) {
-        // measurement
+    AVPacket* packetDecoder = nullptr;
+    std::cout << "press <ESC> to exit video processing" << std::endl;
+    // while (succ) {
+    for (int i = 0; i < 10; ++i) {
+        // timer_start
         readStart = std::chrono::system_clock::now();
-        if (!(succ = reader.readVideoPacket())) break;
-        AVPacket* packet = reader.cloneVideoPacket();
+
+        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
 
         //std::cout << "read packet " << cnt++ << ", pts: " << packet->pts << ", size: " << packet->size << std::endl;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet " << cnt << " read" );
 
-        if(!packet) {
-            std::cout << "nullptr packet -> break" << std::endl;
+        // clone packet for pre-capture buffer
+        AVPacket* packetPreCaptureBuffer = av_packet_clone(packetDecoder);
+        if(!packetPreCaptureBuffer) {
+            std::cout << "nullptr packet motion buffer -> break" << std::endl;
             break;
         }
-        //buffer.push_back(packet);
-        decodeQueue.push(std::move(packet));
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
-        appState.newPacket = true;
-        appState.newPacketCnd.notify_one();
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet "<< cnt << " wait notified");
 
-        // mesurement
+        decodeQueue.push(packetDecoder);
+        preCaptureBuffer.push(packetPreCaptureBuffer);
+
+        // timer_end
         readEnd = std::chrono::system_clock::now();
         long long readDuration = std::chrono::duration_cast<std::chrono::microseconds>(readEnd - readStart).count();
         readTimes.push_back(readDuration);
@@ -513,9 +637,9 @@ int main(int argc, const char *argv[])
     statistics(decodeTimes, "decode_packet in ms");
     statistics(writeTimes, "write_packet in us");
 */
+
     appState.terminate = true;
-    appState.newPacket = true;
-    appState.newPacketCnd.notify_one();
+    decodeQueue.terminate();
 
     // TODO join thread
     std::cout << "wait for motion thread to join" << std::endl;

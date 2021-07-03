@@ -5,6 +5,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+#include <condition_variable>
 #include <mutex>
 #include <queue>
 
@@ -18,7 +19,10 @@ bool isKeyFrame(AVPacket* packet)
 class PacketSafeCircularBuffer
 {
 public:
-    PacketSafeCircularBuffer(size_t bufSize) : m_capacity(bufSize) {}
+    PacketSafeCircularBuffer(size_t bufSize) :
+        m_capacity(bufSize),
+        m_newPacket(false)
+    {}
 
     ~PacketSafeCircularBuffer()
     {
@@ -63,6 +67,8 @@ public:
             av_packet_free(&m_queue.front());
             m_queue.pop();
         }
+        m_newPacket = true;
+        m_newPacketCnd.notify_one();
     }
 
     size_t size()
@@ -71,18 +77,29 @@ public:
         return m_queue.size();
     }
 
-private:
-    mutable std::mutex      m_mtx;
-    std::queue<AVPacket*>   m_queue;
-    size_t                  m_capacity;
+    void waitForNewPacket()
+    {
+        std::unique_lock<std::mutex> lock(m_mtx);
+        m_newPacketCnd.wait(lock, [this]{return m_newPacket;});
+        m_newPacket = false;
+    }
 
+private:
+    size_t                  m_capacity;
+    mutable std::mutex      m_mtx;
+    bool                    m_newPacket;
+    std::condition_variable m_newPacketCnd;
+    std::queue<AVPacket*>   m_queue;
 };
 
 
 class PacketSafeQueue
 {
 public:
-    PacketSafeQueue() {}
+    PacketSafeQueue() :
+        m_newPacket(false),
+        m_terminate(false)
+    {}
 
     ~PacketSafeQueue()
     {
@@ -109,6 +126,8 @@ public:
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         m_queue.push(std::move(packet));
+        m_newPacket = true;
+        m_newPacketCnd.notify_one();
     }
 
     size_t size()
@@ -117,9 +136,26 @@ public:
         return m_queue.size();
     }
 
+    void terminate()
+    {
+        std::lock_guard<std::mutex> lock(m_mtx);
+        m_terminate = true;
+        m_newPacketCnd.notify_one();
+    }
+
+    void waitForNewPacket()
+    {
+        std::unique_lock<std::mutex> lock(m_mtx);
+        m_newPacketCnd.wait(lock, [this]{return (m_newPacket || m_terminate);});
+        m_newPacket = false;
+    }
+
 private:
     mutable std::mutex      m_mtx;
+    bool                    m_newPacket;
+    std::condition_variable m_newPacketCnd;
     std::queue<AVPacket*>   m_queue;
+    bool                    m_terminate;
 };
 
 

@@ -6,7 +6,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-DEFINES -= DEBUG_BUILD
+DEFINES += DEBUG_BUILD
 
 SOURCES += \
     backgroundsubtraction.cpp \
