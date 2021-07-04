@@ -17,6 +17,12 @@ void errLog(const char * file, int line, std::string msg, int error = 0);
 // https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
 #define avErrMsg( msg, ... ) errLog( __FILE__, __LINE__, msg, ##__VA_ARGS__ )
 
+struct VideoStream
+{
+    AVCodecParameters*      videoCodecParameters;
+    AVRational              frameRate;
+    AVRational              timeBase;
+};
 
 struct VideoTiming
 {
@@ -52,6 +58,7 @@ public:
     AVRational          frameRate();
     AVCodecParameters*  getVideoCodecParams();
     AVPacket*           getVideoPacket();  // TODO delete
+    bool                getVideoStreamInfo(VideoStream& videoStreamInfo);
     VideoTiming         getVideoTiming();
     int                 init();
     int                 open(std::string file);

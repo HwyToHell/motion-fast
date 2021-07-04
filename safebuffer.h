@@ -61,13 +61,15 @@ public:
 
     void push(AVPacket *packet)
     {
-        std::lock_guard<std::mutex> lock(m_mtx);
-        m_queue.push(std::move(packet));
-        if (m_queue.size() > m_capacity) {
-            av_packet_free(&m_queue.front());
-            m_queue.pop();
+        {
+            std::lock_guard<std::mutex> lock(m_mtx);
+            m_queue.push(std::move(packet));
+            if (m_queue.size() > m_capacity) {
+                av_packet_free(&m_queue.front());
+                m_queue.pop();
+            }
+            m_newPacket = true;
         }
-        m_newPacket = true;
         m_newPacketCnd.notify_one();
     }
 
@@ -124,9 +126,11 @@ public:
 
     void push(AVPacket* packet)
     {
-        std::lock_guard<std::mutex> lock(m_mtx);
-        m_queue.push(std::move(packet));
-        m_newPacket = true;
+        {
+            std::lock_guard<std::mutex> lock(m_mtx);
+            m_queue.push(std::move(packet));
+            m_newPacket = true;
+        }
         m_newPacketCnd.notify_one();
     }
 

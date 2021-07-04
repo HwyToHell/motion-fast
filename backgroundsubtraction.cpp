@@ -35,7 +35,8 @@ void BackgroundSubtractorLowPass::apply(cv::InputArray image, cv::OutputArray fg
 		cv::Mat accu8U;
 		cv::convertScaleAbs(m_accu, accu8U);
 		cv::absdiff(image, accu8U, fgmask);
-		cv::cvtColor(fgmask, fgmask, cv::COLOR_BGR2GRAY);
+        /* yuv image is one channel gray already */
+        //cv::cvtColor(fgmask, fgmask, cv::COLOR_BGR2GRAY);
         cv::threshold(fgmask, fgmask, m_threshold, UCHAR_MAX, cv::THRESH_BINARY);
 	}
 

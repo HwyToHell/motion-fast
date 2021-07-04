@@ -383,6 +383,21 @@ AVRational LibavReader::timeBase()
 }
 
 
+bool LibavReader::getVideoStreamInfo(VideoStream& videoStreamInfo)
+{
+    // reader opened
+    if (idxVideoStream >= 0) {
+        videoStreamInfo.frameRate = av_stream_get_r_frame_rate(ic->streams[idxVideoStream]);
+        videoStreamInfo.timeBase = ic->streams[idxVideoStream]->time_base;
+        videoStreamInfo.videoCodecParameters = ic->streams[idxVideoStream]->codecpar;
+        return true;
+    } else {
+        avErrMsg("VideoReader must be opened in order to provide steam info");
+        return false;
+    }
+}
+
+
 /*** LibavWriter *************************************************************/
 
 LibavWriter::LibavWriter() :
