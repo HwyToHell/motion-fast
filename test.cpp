@@ -87,14 +87,18 @@ int testNewDecoder(const char * fileName)
         return -1;
     }
 
-    LibavDecoder decoder;
-    AVCodecParameters* codecParams = reader.getVideoCodecParams();
-    decoder.open(codecParams);
-
     // states for motion detection thread
-    StateOld appState;
-    appState.motionStart = false;
+    State appState;
+    appState.motion.start = false;
     appState.terminate = false;
+    if (!reader.getVideoStreamInfo(appState.streamInfo)) {
+        std::cout << "Failed to get video stream info" << std::endl;
+        return -1;
+    }
+
+    LibavDecoder decoder;
+    decoder.open(appState.streamInfo.videoCodecParameters);
+
     PacketSafeQueue decodeQueue;
 
     bool succ = true;
@@ -104,7 +108,7 @@ int testNewDecoder(const char * fileName)
     //for (cnt = 0; cnt<5; ++cnt) {
         // read packet for decoder
         AVPacket* packetDecoder = nullptr;
-        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
+        if (!(succ = reader.readVideoPacket(packetDecoder))) break;
         decodeQueue.push(packetDecoder);
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet decoder" << cnt << " read" );
 
@@ -117,10 +121,6 @@ int testNewDecoder(const char * fileName)
         buffer.push(packetPreCaptureBuffer);
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
-        appState.newPacket = true;
-        appState.newPacketCnd.notify_one();
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet " << cnt << " wait notified");
-
         ++cnt;
     }
     std::cout << "finished reading " << cnt << " packets" << std::endl;
@@ -191,21 +191,15 @@ int testRefAVBuffer(const char * fileName)
         return -1;
     }
 
-    AVRational timeBase = reader.timeBase();
-    if (timeBase.den == 0) {
-        std::cout << "Failed to get time base: " << std::endl;
-        return -1;
-    }
-    AVRational fps = reader.frameRate();
-    if (fps.den == 0) {
-        std::cout << "Failed to get fps: " << std::endl;
+    // motion detection thread
+    State appState;
+    appState.motion.start = false;
+    appState.terminate = false;
+    if (!reader.getVideoStreamInfo(appState.streamInfo)) {
+        std::cout << "Failed to get video stream info" << std::endl;
         return -1;
     }
 
-    // motion detection thread
-    StateOld appState;
-    appState.motionStart = false;
-    appState.terminate = false;
     PacketSafeQueue decodeQueue;
 
     cv::Mat img;
@@ -216,7 +210,7 @@ int testRefAVBuffer(const char * fileName)
     for (int i = 0; i<5; ++i) {
         // read packet for decoder
         AVPacket* packetDecoder = nullptr;
-        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
+        if (!(succ = reader.readVideoPacket(packetDecoder))) break;
         decodeQueue.push(packetDecoder);
         std::cout   << "packet decoder " << i << std::endl
                     << "addr: " << static_cast<void*>(packetDecoder)
@@ -244,10 +238,6 @@ int testRefAVBuffer(const char * fileName)
         buffer.push(packetPreCaptureBuffer);
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", queue size: " << decodeQueue.size());
-        appState.newPacket = true;
-        appState.newPacketCnd.notify_one();
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet "<< cnt << " wait notified");
-
 
         //cv::imshow("video frame", img);
         //if (cv::waitKey(10) == 27) break;
@@ -255,7 +245,7 @@ int testRefAVBuffer(const char * fileName)
         std::this_thread::sleep_for(std::chrono::milliseconds(40));
 
     }
-    // mit readVideoPacket2() nicht erforderlich
+    // mit readVideoPacket() nicht erforderlich
     // AVPacket* pkt = reader.getVideoPacket();
     // av_packet_unref(pkt);
 
@@ -355,7 +345,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         if (!decoder.retrieveFrame(frame)) {
             std::cout << "Failed to retrieve frame for motion detection" << std::endl;
         }
-        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved");
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved, time "  << decoder.frameTime(appState.streamInfo.timeBase) << " sec");
 
         // detect motion
         appState.motion.start = detector.isContinuousMotion(frame);
@@ -365,6 +355,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         cv::imshow("motion_mask", detector.motionMask());
         if (cv::waitKey(10) == 27)
             break;
+        DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", motion detection finished");
 
 
         // detect motion dummy
@@ -519,7 +510,7 @@ int main(int argc, const char *argv[])
         // timer_start
         readStart = std::chrono::system_clock::now();
 
-        if (!(succ = reader.readVideoPacket2(packetDecoder))) break;
+        if (!(succ = reader.readVideoPacket(packetDecoder))) break;
 
         //std::cout << "read packet " << cnt++ << ", pts: " << packet->pts << ", size: " << packet->size << std::endl;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet " << cnt << " read" );

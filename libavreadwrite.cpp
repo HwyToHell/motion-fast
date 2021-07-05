@@ -70,6 +70,16 @@ bool LibavDecoder::decodePacket(AVPacket* packet)
 }
 
 
+double LibavDecoder::frameTime(AVRational timeBase)
+{
+    if (m_frame) {
+        return (static_cast<double>(m_frame->pts) * timeBase.num / timeBase.den);
+    } else {
+        return 0;
+    }
+}
+
+
 int LibavDecoder::open(AVCodecParameters* vCodecParams)
 {
     m_codecParams = vCodecParams;
@@ -128,11 +138,9 @@ bool LibavDecoder::retrieveFrame(cv::Mat& grayImage)
 /*** LibavReader *************************************************************/
 
 LibavReader::LibavReader() :
-    codec(nullptr),
-    frame(nullptr),
-    ic(nullptr),
-    idxVideoStream(-1),
-    packet(nullptr)
+    m_inCtx(nullptr),
+    m_idxVideoStream(-1),
+    m_packet(nullptr)
 {
 
 }
@@ -144,8 +152,7 @@ LibavReader::~LibavReader()
 }
 
 
-void freeOpenReader(AVFormatContext *ic, AVCodecContext *codecCtx) {
-    avcodec_free_context(&codecCtx);
+void freeOpenReader(AVFormatContext *ic) {
     avformat_close_input(&ic);
     avformat_free_context(ic);
 }
@@ -153,76 +160,30 @@ void freeOpenReader(AVFormatContext *ic, AVCodecContext *codecCtx) {
 
 AVPacket* LibavReader::cloneVideoPacket()
 {
-    return av_packet_clone(packet);
+    return av_packet_clone(m_packet);
 }
 
 
 void LibavReader::close()
 {
-    av_frame_free(&frame);
-    av_packet_free(&packet);
-    freeOpenReader(ic, codecCtx);
-    idxVideoStream = -1;
+    av_packet_free(&m_packet);
+    freeOpenReader(m_inCtx);
+    m_idxVideoStream = -1;
 }
 
 
-bool LibavReader::decodePacket(AVPacket* packet)
+bool LibavReader::getVideoStreamInfo(VideoStream& videoStreamInfo)
 {
-    if (idxVideoStream < 0) {
-        avErrMsg("VideoReader must be opened before decoding packets");
-        return false;
-    }
-
-    int ret = avcodec_send_packet(codecCtx, packet);
-    if (ret < 0) {
-        avErrMsg("Failed to send packet to decoder", ret);
-        return false;
-    }
-
-    ret = avcodec_receive_frame(codecCtx, frame);
-    if (ret == 0) {
-        return true; // frame available
-    } else if (ret != AVERROR(EAGAIN)) {
-        avErrMsg("Failed to receive frame from decoder", ret);
-        return false;
-    }
-
-    return false; // no frame was returned, read next packet
-}
-
-
-AVRational LibavReader::frameRate()
-{
-    if (idxVideoStream >= 0) {
-        return av_stream_get_r_frame_rate(ic->streams[idxVideoStream]);
+    // reader opened
+    if (m_idxVideoStream >= 0) {
+        videoStreamInfo.frameRate = av_stream_get_r_frame_rate(m_inCtx->streams[m_idxVideoStream]);
+        videoStreamInfo.timeBase = m_inCtx->streams[m_idxVideoStream]->time_base;
+        videoStreamInfo.videoCodecParameters = m_inCtx->streams[m_idxVideoStream]->codecpar;
+        return true;
     } else {
-        return AVRational {0,0};
+        avErrMsg("VideoReader must be opened in order to provide steam info");
+        return false;
     }
-}
-
-
-AVCodecParameters* LibavReader::getVideoCodecParams()
-{
-    if (idxVideoStream >= 0) {
-        return (ic->streams[idxVideoStream]->codecpar);
-    } else {
-        return nullptr;
-    }
-}
-
-
-AVPacket* LibavReader::getVideoPacket()
-{
-    return packet;
-}
-
-
-VideoTiming LibavReader::getVideoTiming()
-{
-    VideoTiming timing;
-    timing.frameRate = idxVideoStream >= 0 ? av_stream_get_r_frame_rate(ic->streams[idxVideoStream]) : AVRational {0,0};
-    timing.timeBase = idxVideoStream >= 0 ? ic->streams[idxVideoStream]->time_base : AVRational {0,0};
-    return timing;
 }
 
 
@@ -238,73 +199,46 @@ int LibavReader::open(std::string fileName)
 {
     int ret = -1;
 
-    ic = avformat_alloc_context();
+    m_inCtx = avformat_alloc_context();
 
-    ret = avformat_open_input(&ic, fileName.c_str(), nullptr, nullptr);
+    ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, nullptr);
     if (ret < 0) {
         avErrMsg("Failed to open input", ret);
-        freeOpenReader(ic, codecCtx);
+        freeOpenReader(m_inCtx);
         return ret;
     }
 
-    ret = avformat_find_stream_info(ic, nullptr);
+    ret = avformat_find_stream_info(m_inCtx, nullptr);
     if (ret < 0) {
         avErrMsg("Failed to retrieve input stream information", ret);
-        freeOpenReader(ic, codecCtx);
+        freeOpenReader(m_inCtx);
         return ret;
     }
 
     // get video stream and decoder
-    idxVideoStream = -1;
-    for (unsigned int i = 0; i < ic->nb_streams; ++i) {
-        AVStream *inStream = ic->streams[i];
+    m_idxVideoStream = -1;
+    for (unsigned int i = 0; i < m_inCtx->nb_streams; ++i) {
+        AVStream *inStream = m_inCtx->streams[i];
         AVCodecParameters *inCodecPar = inStream->codecpar;
         if (inCodecPar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            idxVideoStream = static_cast<int>(i);
-            codec = avcodec_find_decoder(inCodecPar->codec_id);
+            m_idxVideoStream = static_cast<int>(i);
+            AVCodec* codec = avcodec_find_decoder(inCodecPar->codec_id);
             if (!codec) {
                 avErrMsg("Unsupported codec for video stream");
-                idxVideoStream = -2;
+                m_idxVideoStream = -2;
             }
-            codecParams = inCodecPar;
         }
     }
-    if (idxVideoStream < 0) {
+    if (m_idxVideoStream < 0) {
         avErrMsg("Video input does not contain a video stream or unsupported codec");
-        freeOpenReader(ic, codecCtx);
+        freeOpenReader(m_inCtx);
         return ret;
     }
 
-    // TODO move to decoder
-    // get codec context and open codec
-    codecCtx = avcodec_alloc_context3(codec);
-    if (!codecCtx) {
-        avErrMsg("Failed to allocate memory for AVCodecContext");
-        freeOpenReader(ic, codecCtx);
-        return ret;
-    }
-    ret = avcodec_parameters_to_context(codecCtx, codecParams);
-    if (ret < 0) {
-        avErrMsg("Failed to copy codec params to codec context", ret);
-        freeOpenReader(ic, codecCtx);
-        return ret;
-    }
-    ret = avcodec_open2(codecCtx, codec, nullptr);
-    if (ret < 0) {
-        avErrMsg("Failed to open codec", ret);
-        freeOpenReader(ic, codecCtx);
-        return ret;
-    }
-
-    // alloc packet and frame struct
-    packet = av_packet_alloc();
-    if (!packet) {
+    // alloc packet struct
+    m_packet = av_packet_alloc();
+    if (!m_packet) {
         avErrMsg("Failed to allocate memory for AVPacket");
-        return -1;
-    }
-    frame = av_frame_alloc();
-    if (!frame) {
-        avErrMsg("Failed to allocate memory for AVFrame");
         return -1;
     }
 
@@ -312,37 +246,13 @@ int LibavReader::open(std::string fileName)
 }
 
 
-bool LibavReader::readVideoPacket()
-{
-    av_packet_unref(packet);
-
-    int ret = -1;
-    // read videostream only
-    for (unsigned int i = 0; i < ic->nb_streams; i++) {
-        ret = av_read_frame(ic, packet);
-        if (ret == AVERROR_EOF) {
-            std::cout << "end of file" << std::endl;
-            return false;
-        } else if (ret < 0) {
-            avErrMsg("Failed to read packet", ret);
-            return false;
-        }
-
-        if (packet->stream_index == idxVideoStream) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-bool LibavReader::readVideoPacket2(AVPacket*& pkt)
+bool LibavReader::readVideoPacket(AVPacket*& pkt)
 {
     pkt = nullptr;
     int ret = -1;
     // read videostream only
-    for (unsigned int i = 0; i < ic->nb_streams; i++) {
-        ret = av_read_frame(ic, packet);
+    for (unsigned int i = 0; i < m_inCtx->nb_streams; i++) {
+        ret = av_read_frame(m_inCtx, m_packet);
         if (ret == AVERROR_EOF) {
             std::cout << "end of file" << std::endl;
             return false;
@@ -351,51 +261,15 @@ bool LibavReader::readVideoPacket2(AVPacket*& pkt)
             return false;
         }
 
-        if (packet->stream_index == idxVideoStream) {
-            pkt = av_packet_clone(packet);
-            av_packet_unref(packet);
+        if (m_packet->stream_index == m_idxVideoStream) {
+            pkt = av_packet_clone(m_packet);
+            av_packet_unref(m_packet);
             return true;
         }
     }
     return false;
 }
 
-
-bool LibavReader::retrieveFrame(cv::Mat& image)
-{
-    if (!frame->width || !frame->height) {
-        return false;
-    } else {
-        cv::Size frameSize(frame->width, frame->height);
-        image = cv::Mat(frameSize, CV_8UC1, frame->data[0]);
-        return true;
-    }
-}
-
-
-AVRational LibavReader::timeBase()
-{
-    if (idxVideoStream >= 0) {
-        return (ic->streams[idxVideoStream]->time_base);
-    } else {
-        return AVRational {0,0};
-    }
-}
-
-
-bool LibavReader::getVideoStreamInfo(VideoStream& videoStreamInfo)
-{
-    // reader opened
-    if (idxVideoStream >= 0) {
-        videoStreamInfo.frameRate = av_stream_get_r_frame_rate(ic->streams[idxVideoStream]);
-        videoStreamInfo.timeBase = ic->streams[idxVideoStream]->time_base;
-        videoStreamInfo.videoCodecParameters = ic->streams[idxVideoStream]->codecpar;
-        return true;
-    } else {
-        avErrMsg("VideoReader must be opened in order to provide steam info");
-        return false;
-    }
-}
 
 
 /*** LibavWriter *************************************************************/

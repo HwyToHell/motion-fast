@@ -38,6 +38,7 @@ public:
     ~LibavDecoder();
     void                close();
     bool                decodePacket(AVPacket* packet);
+    double              frameTime(AVRational timeBase);
     int                 open(AVCodecParameters* vCodecParams);
     bool                retrieveFrame(cv::Mat& grayImage);
 private:
@@ -55,25 +56,14 @@ public:
     AVPacket*           cloneVideoPacket();
     void                close();
     bool                decodePacket(AVPacket* packet);
-    AVRational          frameRate();
-    AVCodecParameters*  getVideoCodecParams();
-    AVPacket*           getVideoPacket();  // TODO delete
     bool                getVideoStreamInfo(VideoStream& videoStreamInfo);
-    VideoTiming         getVideoTiming();
     int                 init();
     int                 open(std::string file);
-    bool                readVideoPacket(); // TODO delete
-    bool                readVideoPacket2(AVPacket*& pkt);
-    bool                retrieveFrame(cv::Mat& frame);
-    AVRational          timeBase(); // TODO delete
+    bool                readVideoPacket(AVPacket*& pkt);
 private:
-    AVCodec             *codec;
-    AVCodecContext      *codecCtx;
-    AVCodecParameters   *codecParams;
-    AVFrame             *frame;
-    AVFormatContext     *ic;
-    int                 idxVideoStream; // assumption: there is only one video stream
-    AVPacket            *packet;
+    AVFormatContext*    m_inCtx;
+    int                 m_idxVideoStream; // assumption: there is only one video stream
+    AVPacket*           m_packet;
 };
 
 
