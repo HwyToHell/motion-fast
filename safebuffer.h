@@ -12,7 +12,10 @@ extern "C" {
 
 bool isKeyFrame(AVPacket* packet)
 {
-    return (packet->flags & AV_PKT_FLAG_KEY) ? true : false;
+    if (packet->flags & AV_PKT_FLAG_KEY)
+        return true;
+    else
+        return false;
 }
 
 
@@ -54,7 +57,7 @@ public:
             if (isKeyFrame(packet)) {
                 return true;
             }
-            av_packet_free(&m_queue.front());
+            av_packet_unref(packet);
         }
         return false;
     }
@@ -79,10 +82,17 @@ public:
         return m_queue.size();
     }
 
+    void terminate()
+    {
+        std::lock_guard<std::mutex> lock(m_mtx);
+        m_terminate = true;
+        m_newPacketCnd.notify_one();
+    }
+
     void waitForNewPacket()
     {
         std::unique_lock<std::mutex> lock(m_mtx);
-        m_newPacketCnd.wait(lock, [this]{return m_newPacket;});
+        m_newPacketCnd.wait(lock, [this]{return (m_newPacket || m_terminate);});
         m_newPacket = false;
     }
 
@@ -92,6 +102,7 @@ private:
     bool                    m_newPacket;
     std::condition_variable m_newPacketCnd;
     std::queue<AVPacket*>   m_queue;
+    bool                    m_terminate;
 };
 
 

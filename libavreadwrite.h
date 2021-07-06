@@ -24,13 +24,6 @@ struct VideoStream
     AVRational              timeBase;
 };
 
-struct VideoTiming
-{
-    AVRational  frameRate;
-    AVRational  timeBase;
-};
-
-
 class LibavDecoder
 {
 public:
@@ -72,18 +65,18 @@ class LibavWriter
 public:
     LibavWriter();
     ~LibavWriter();
-    void    close();
-    bool    frameRate(AVRational fps);
-    int     init();
-    int     open(std::string file, AVCodecParameters* vCodecParams);
-    bool    timeBase(AVRational timeBase);
-    bool    writeVideoPacket(AVPacket *packet);
+    void                close();
+    int                 init();
+    int                 open(std::string file, VideoStream videoStreamInfo);
+    bool                writeVideoPacket(AVPacket *packet);
 private:
-    int             idxVideoStream; // assumption: there is only one video stream
-    bool            isOpen;
-    AVFormatContext *oc;
-    AVStream        *os;
-    int64_t         packetCount;
+    bool                setFrameRate(AVRational fps);
+    bool                setTimeBase(AVRational timeBase);
+    int                 m_idxVideoStream; // assumption: there is only one video stream
+    bool                m_isOpen;
+    AVFormatContext*    m_outCtx;
+    AVStream*           m_outStream;
+    int64_t             m_packetCount;
 };
 
 #endif // LIBAVREADWRITE_H

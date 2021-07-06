@@ -275,11 +275,11 @@ bool LibavReader::readVideoPacket(AVPacket*& pkt)
 /*** LibavWriter *************************************************************/
 
 LibavWriter::LibavWriter() :
-    idxVideoStream(-1),
-    isOpen(false),
-    oc(nullptr),
-    os(nullptr),
-    packetCount(0)
+    m_idxVideoStream(-1),
+    m_isOpen(false),
+    m_outCtx(nullptr),
+    m_outStream(nullptr),
+    m_packetCount(0)
 {
 
 }
@@ -287,47 +287,31 @@ LibavWriter::LibavWriter() :
 
 LibavWriter::~LibavWriter()
 {
-    close();
+    if (m_isOpen)
+        close();
 }
 
 
-void freeOpenWriter(AVFormatContext *oc)
+void freeOpenWriter(AVFormatContext *m_outCtx)
 {
-    avformat_free_context(oc);
+    avformat_free_context(m_outCtx);
 }
 
 
 void LibavWriter::close() {
-    int ret = av_write_trailer(oc);
+    int ret = av_write_trailer(m_outCtx);
     if (ret < 0) {
         avErrMsg("Failed to write trailer", ret);
     }
 
-    ret = avio_closep(&oc->pb);
+    ret = avio_closep(&m_outCtx->pb);
     if (ret < 0) {
         avErrMsg("Failed to close output file", ret);
     }
 
-    freeOpenWriter(oc);
-    idxVideoStream = -1;
-    isOpen = false;
-}
-
-
-bool LibavWriter::frameRate(AVRational fps)
-{
-    if (isOpen) {
-        av_stream_set_r_frame_rate(os, fps);
-        if (os->r_frame_rate.den == fps.den && os->r_frame_rate.num == fps.num) {
-            return true;
-        } else {
-            avErrMsg("Failed to set frame rate");
-            return false;
-        }
-    } else {
-        avErrMsg("LibavWriter must be open in order to set frame rate");
-        return false;
-    }
+    freeOpenWriter(m_outCtx);
+    m_idxVideoStream = -1;
+    m_isOpen = false;
 }
 
 
@@ -338,59 +322,85 @@ int LibavWriter::init()
 }
 
 
-int LibavWriter::open(std::string file, AVCodecParameters* vCodecParams)
+int LibavWriter::open(std::string file, VideoStream vStreamInfo)
 {
-    int ret = avformat_alloc_output_context2(&oc, nullptr, nullptr, file.c_str());
+    int ret = avformat_alloc_output_context2(&m_outCtx, nullptr, nullptr, file.c_str());
 
     if (ret < 0) {
         avErrMsg("Failed to create output context", ret);
-        freeOpenWriter(oc);
+        freeOpenWriter(m_outCtx);
         return ret;
     }
 
-    os = avformat_new_stream(oc, nullptr);
-    if (!os) {
+    m_outStream = avformat_new_stream(m_outCtx, nullptr);
+    if (!m_outStream) {
         avErrMsg("Failed to create output stream");
-        freeOpenWriter(oc);
+        freeOpenWriter(m_outCtx);
         return -1;
     }
-    idxVideoStream = os->index;
+    m_idxVideoStream = m_outStream->index;
 
-    ret = avcodec_parameters_copy(os->codecpar, vCodecParams);
+    ret = avcodec_parameters_copy(m_outStream->codecpar, vStreamInfo.videoCodecParameters);
     if (ret < 0) {
         avErrMsg("Failed to set codec parameters", ret);
-        freeOpenWriter(oc);
+        freeOpenWriter(m_outCtx);
         return ret;
     }
 
-    ret = avio_open(&oc->pb, file.c_str(), AVIO_FLAG_WRITE);
+    if (!setTimeBase(vStreamInfo.timeBase)) {
+        avErrMsg("Failed to set time base");
+        return -1;
+    }
+    if (!setFrameRate(vStreamInfo.frameRate)) {
+        avErrMsg("Failed to set frame rate");
+        return -1;
+    }
+
+    ret = avio_open(&m_outCtx->pb, file.c_str(), AVIO_FLAG_WRITE);
     if (ret < 0) {
         avErrMsg("Failed to open output file", ret);
-        freeOpenWriter(oc);
+        freeOpenWriter(m_outCtx);
         return ret;
     }
 
-    ret = avformat_write_header(oc, nullptr);
+    ret = avformat_write_header(m_outCtx, nullptr);
     if (ret < 0) {
         avErrMsg("Failed to write header", ret);
-        avio_closep(&oc->pb);
-        freeOpenWriter(oc);
+        avio_closep(&m_outCtx->pb);
+        freeOpenWriter(m_outCtx);
         return ret;
     }
 
-    packetCount = 0;
-    isOpen = true;
+    m_packetCount = 0;
+    m_isOpen = true;
     return 0;
 }
 
 
-bool LibavWriter::timeBase(AVRational timeBase)
+bool LibavWriter::setFrameRate(AVRational fps)
 {
-    if (isOpen) {
-        os->time_base = timeBase;
+    if (m_outStream) {
+        av_stream_set_r_frame_rate(m_outStream, fps);
+        if (m_outStream->r_frame_rate.den == fps.den && m_outStream->r_frame_rate.num == fps.num) {
+            return true;
+        } else {
+            avErrMsg("Failed to set frame rate");
+            return false;
+        }
+    } else {
+        avErrMsg("Output stream must be open in order to set frame rate");
+        return false;
+    }
+}
+
+
+bool LibavWriter::setTimeBase(AVRational timeBase)
+{
+    if (m_outStream) {
+        m_outStream->time_base = timeBase;
         return true;
     } else {
-        avErrMsg("LibavWriter must be open in order to set time base");
+        avErrMsg("Output stream must be open in order to set time base");
         return false;
     }
 
@@ -400,18 +410,18 @@ bool LibavWriter::timeBase(AVRational timeBase)
 bool LibavWriter::writeVideoPacket(AVPacket *packet)
 {
     // ändern: video stream index, pos = -1
-    packet->stream_index = idxVideoStream;
+    packet->stream_index = m_idxVideoStream;
     packet->pos = -1;
-    // calc pts: pts = packetCount * time base * (1 / fps)
-    int64_t time_base = os->time_base.den * os->r_frame_rate.den / os->time_base.num / os->r_frame_rate.num;
-    packet->pts = packet->dts = packetCount * time_base;
+    // calc pts: pts = m_packetCount * time base * (1 / fps)
+    int64_t time_base = m_outStream->time_base.den * m_outStream->r_frame_rate.den / m_outStream->time_base.num / m_outStream->r_frame_rate.num;
+    packet->pts = packet->dts = m_packetCount * time_base;
 
-    int ret = av_interleaved_write_frame(oc, packet);
+    int ret = av_interleaved_write_frame(m_outCtx, packet);
     if (ret < 0) {
         avErrMsg("Failed to write video packet", ret);
         return false;
     }
 
-    ++packetCount;
+    ++m_packetCount;
     return true;
 }
