@@ -11,7 +11,6 @@ DEFINES += DEBUG_BUILD
 SOURCES += \
     backgroundsubtraction.cpp \
     decode-buffer.cpp \
-    decode.c \
     libavreadwrite.cpp \
     motion-detector.cpp \
     test.cpp \

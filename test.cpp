@@ -47,6 +47,53 @@ struct State
 };
 
 
+class PerfCounter
+{
+public:
+    PerfCounter(std::string name) : m_name(name) {}
+
+    void startCount()
+    {
+        m_start = std::chrono::system_clock::now();
+    }
+
+    void stopCount()
+    {
+        m_stop = std::chrono::system_clock::now();
+        long long count = std::chrono::duration_cast<std::chrono::milliseconds>(m_stop - m_start).count();
+        m_samples.push_back(count);
+    }
+
+    void printStatistics()
+    {
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wall"
+        // std::vector<long long>::iterator itMax = std::max_element(m_samples.begin(), m_samples.end());
+        long long max = *(std::max_element(m_samples.begin(), m_samples.end()));
+        // long long max = *itMax;
+        #pragma GCC diagnostic pop
+
+        long long sum = std::accumulate(m_samples.begin(), m_samples.end(), 0);
+        double mean = static_cast<double>(sum) / m_samples.size();
+
+        double variance = 0, stdDeviation = 0;
+        for (auto sample : m_samples) {
+            variance += pow ((sample - mean), 2);
+        }
+        stdDeviation = sqrt(variance / m_samples.size());
+
+        std::cout << std::endl << "===================================" << std::endl << m_name << std::endl;
+        std::cout << "mean: " << mean << " max: " << max << std::endl;
+        std::cout << "95%:  " << mean + (2 * stdDeviation) << std::endl;
+    }
+
+private:
+    std::string             m_name;
+    std::vector<long long>  m_samples;
+    TimePoint               m_start;
+    TimePoint               m_stop;
+};
+
 
 // FUNCTIONS
 void statistics(std::vector<long long> samples, std::string name);
@@ -277,6 +324,9 @@ int testRefAVBuffer(const char * fileName)
 int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
 {
     DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", thread motion started");
+    PerfCounter decode("decoding");
+    PerfCounter motion("motion detection");
+
     LibavDecoder decoder;
     int ret = decoder.open(appState.streamInfo.videoCodecParameters);
     if (ret < 0){
@@ -305,6 +355,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet received");
         if (appState.terminate) break;
         int cntDecoded = 0;
+        decode.startCount();
         while (packetQueue.pop(packet)) {
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet "
                   << cntDecoded << " popped, pts: " << packet->pts << ", size: " << packet->size);
@@ -325,7 +376,10 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         }
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved, time "  << decoder.frameTime(appState.streamInfo.timeBase) << " sec");
 
+        decode.stopCount();
+
         // detect motion
+        motion.startCount();
         bool isMotion = detector.isContinuousMotion(frame);
         if (isMotion) {
             if (!appState.motion.writeInProgress) {
@@ -344,6 +398,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
                 appState.motion.stop = true;
             }
         }
+        motion.stopCount();
 
 
         cv::imshow("frame", frame);
@@ -362,6 +417,9 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     av_packet_free(&packet);
     cv::destroyAllWindows();
     decoder.close();
+
+    decode.printStatistics();
+    motion.printStatistics();
     return 0;
 }
 
