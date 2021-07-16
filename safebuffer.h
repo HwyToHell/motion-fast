@@ -24,16 +24,13 @@ class PacketSafeCircularBuffer
 public:
     PacketSafeCircularBuffer(size_t bufSize) :
         m_capacity(bufSize),
-        m_newPacket(false)
+        m_newPacket(false),
+        m_terminate(false)
     {}
 
     ~PacketSafeCircularBuffer()
     {
-        std::lock_guard<std::mutex> lock(m_mtx);
-        while (m_queue.size() > 0) {
-            av_packet_free(&m_queue.front());
-            m_queue.pop();
-        }
+        reset();
     }
 
     bool pop(AVPacket*& packet)
@@ -73,6 +70,18 @@ public:
             }
             m_newPacket = true;
         }
+        m_newPacketCnd.notify_one();
+    }
+
+    // discharge queue and signal newPacket in order to unblock waiting state
+    void reset()
+    {
+        std::lock_guard<std::mutex> lock(m_mtx);
+        while (m_queue.size() > 0) {
+            av_packet_free(&m_queue.front());
+            m_queue.pop();
+        }
+        m_newPacket = true;
         m_newPacketCnd.notify_one();
     }
 
@@ -116,11 +125,7 @@ public:
 
     ~PacketSafeQueue()
     {
-        std::lock_guard<std::mutex> lock(m_mtx);
-        while (m_queue.size() > 0) {
-            av_packet_free(&m_queue.front());
-            m_queue.pop();
-        }
+        reset();
     }
 
     bool pop(AVPacket*& packet)
@@ -143,6 +148,15 @@ public:
             m_newPacket = true;
         }
         m_newPacketCnd.notify_one();
+    }
+
+    void reset()
+    {
+        std::lock_guard<std::mutex> lock(m_mtx);
+        while (m_queue.size() > 0) {
+            av_packet_free(&m_queue.front());
+            m_queue.pop();
+        }
     }
 
     size_t size()

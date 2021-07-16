@@ -51,7 +51,9 @@ public:
     bool                decodePacket(AVPacket* packet);
     bool                getVideoStreamInfo(VideoStream& videoStreamInfo);
     int                 init();
+    bool                isOpen();
     int                 open(std::string file);
+    bool                playStream();
     bool                readVideoPacket(AVPacket*& pkt);
 private:
     AVFormatContext*    m_inCtx;

@@ -1,6 +1,10 @@
 #include "motion-detector.h"
 
 MotionDetector::MotionDetector() :
+    m_perfPre("pre-process"),
+    m_perfApply("bgrSub"),
+    m_perfPost("cntNonZero"),
+
     m_isContinuousMotion{false},
     m_minMotionDuration{10},    // number of consecutive frames with motion
     m_minMotionIntensity{100},  // number of pixels with motion
@@ -36,10 +40,23 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
 
     // pre-processing of clipped frame
     cv::Mat processedFrame;
-    cv::blur(frame(m_roi), processedFrame, cv::Size(10,10));
+    m_perfPre.startCount();
+    /* performance for pre-processing HD frame on RPi:
+     * blur10x10: 20ms      bgrSub: 25ms
+     * resize0.5:  2ms      bgrSub:  5ms
+     * */
+    //cv::blur(frame(m_roi), processedFrame, cv::Size(10,10));
+    cv::resize(frame, processedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
+    //cv::resize(frame, processedFrame, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+    m_perfPre.stopCount();
 
     // detect motion in current frame
+    m_perfApply.startCount();
     m_bgrSub->apply(processedFrame, m_motionMask);
+    //m_bgrSub->apply(frame, m_motionMask);
+
+    m_perfApply.stopCount();
+    m_perfPost.startCount();
     int motionIntensity = cv::countNonZero(m_motionMask);
     bool isMotion = motionIntensity > m_minMotionIntensity ? true : false;
 
@@ -76,6 +93,7 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
         m_motionDuration = m_motionDuration <= 0
                 ? 0 : m_motionDuration;
     }
+    m_perfPost.stopCount();
 
     return isMotion;
 }

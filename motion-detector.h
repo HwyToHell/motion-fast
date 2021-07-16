@@ -1,7 +1,7 @@
 #ifndef MOTIONDETECTOR_H
 #define MOTIONDETECTOR_H
-//#include "motionbuffer.h"
 #include "backgroundsubtraction.h"
+#include "perfcounter.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -34,6 +34,10 @@ public:
     /* region of interest related to upper left corner */
     void        roi(cv::Rect);
     cv::Rect    roi() const;
+    PerfCounter m_perfPre;
+    PerfCounter m_perfApply;
+    PerfCounter m_perfPost;
+
 
     // TODO reset backgroundsubtractor
 private:

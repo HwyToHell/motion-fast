@@ -4,16 +4,15 @@ extern "C" {
 }
 
 #include "motion-detector.h"
+#include "perfcounter.h"
 #include "safebuffer.h"
 #include "safequeque.h" // TODO delete
 #include "time-stamp.h"
 
 #include <atomic>
-#include <chrono>
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
-#include <numeric>  // accumulate
 #include <thread>
 
 #ifdef DEBUG_BUILD
@@ -22,8 +21,6 @@ extern "C" {
     #define DEBUG(x) do {} while (0)
 #endif
 
-// TYPES
-typedef std::chrono::time_point<std::chrono::system_clock> TimePoint;
 
 
 // CLASSES
@@ -47,56 +44,7 @@ struct State
 };
 
 
-class PerfCounter
-{
-public:
-    PerfCounter(std::string name) : m_name(name) {}
-
-    void startCount()
-    {
-        m_start = std::chrono::system_clock::now();
-    }
-
-    void stopCount()
-    {
-        m_stop = std::chrono::system_clock::now();
-        long long count = std::chrono::duration_cast<std::chrono::milliseconds>(m_stop - m_start).count();
-        m_samples.push_back(count);
-    }
-
-    void printStatistics()
-    {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wall"
-        // std::vector<long long>::iterator itMax = std::max_element(m_samples.begin(), m_samples.end());
-        long long max = *(std::max_element(m_samples.begin(), m_samples.end()));
-        // long long max = *itMax;
-        #pragma GCC diagnostic pop
-
-        long long sum = std::accumulate(m_samples.begin(), m_samples.end(), 0);
-        double mean = static_cast<double>(sum) / m_samples.size();
-
-        double variance = 0, stdDeviation = 0;
-        for (auto sample : m_samples) {
-            variance += pow ((sample - mean), 2);
-        }
-        stdDeviation = sqrt(variance / m_samples.size());
-
-        std::cout << std::endl << "===================================" << std::endl << m_name << std::endl;
-        std::cout << "mean: " << mean << " max: " << max << std::endl;
-        std::cout << "95%:  " << mean + (2 * stdDeviation) << std::endl;
-    }
-
-private:
-    std::string             m_name;
-    std::vector<long long>  m_samples;
-    TimePoint               m_start;
-    TimePoint               m_stop;
-};
-
-
 // FUNCTIONS
-void statistics(std::vector<long long> samples, std::string name);
 
 
 // test new decoder 2021-07-01
@@ -355,15 +303,17 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet received");
         if (appState.terminate) break;
         int cntDecoded = 0;
-        decode.startCount();
+
         while (packetQueue.pop(packet)) {
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet "
                   << cntDecoded << " popped, pts: " << packet->pts << ", size: " << packet->size);
             if (appState.terminate) break;
+            decode.startCount();
             if (!decoder.decodePacket(packet)) {
                 std::cout << "Failed to decode packet for motion detection" << std::endl;
             }
-            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded");
+            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded, queueSize: " << packetQueue.size());
+            decode.stopCount();
 
             av_packet_unref(packet);
             // count decoded packets for debugging purposes
@@ -376,7 +326,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         }
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved, time "  << decoder.frameTime(appState.streamInfo.timeBase) << " sec");
 
-        decode.stopCount();
+
 
         // detect motion
         motion.startCount();
@@ -418,8 +368,13 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     cv::destroyAllWindows();
     decoder.close();
 
-    decode.printStatistics();
+
     motion.printStatistics();
+    detector.m_perfPre.printStatistics();
+    detector.m_perfApply.printStatistics();
+    detector.m_perfPost.printStatistics();
+    decode.printStatistics();
+    //decode.printAllSamples();
     return 0;
 }
 
@@ -456,7 +411,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
         case State::open:
         {
             waitForMotion(appState);
-            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waitForMotion triggered");
+            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waitForMotion triggered, bufSize: " << buffer.size());
             if (appState.terminate) {
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", terminate");
                 break;
@@ -493,7 +448,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
         case State::write:
         {
             buffer.waitForNewPacket();
-            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", write: waitForNewPacket triggered");
+            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", write: waitForNewPacket triggered, bufSize: " << buffer.size());
             AVPacket* packet;
             while(buffer.pop(packet)) {
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet popped (pts: " << packet->pts << ")");
@@ -521,7 +476,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
         case State::close:
         {
             buffer.waitForNewPacket();
-            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", close: waitForNewPacket triggered");
+            DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", close: waitForNewPacket triggered, bufSize: " << buffer.size());
             AVPacket* packet;
             while(buffer.pop(packet)) {
                 writer.writeVideoPacket(packet);
@@ -547,12 +502,14 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
 
 
-int main(int argc, const char *argv[])
+int main_test_libav(int argc, const char *argv[])
 {
     if (argc < 2) {
         std::cout << "usage: libavreader videofile.mp4" << std::endl;
         return -1;
     }
+
+    avformat_network_init();
 
     //testRefAVBuffer(argv[1]);
     // testNewDecoder(argv[1]);
@@ -598,7 +555,11 @@ int main(int argc, const char *argv[])
     bool succ = true;
     int cnt = 0;
     AVPacket* packetDecoder = nullptr;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << "press <ESC> to exit video processing" << std::endl;
+
+    //reader.playStream();
+
     while (succ) {
     //for (int i = 0; i < 30; ++i) {
         // timer_start
@@ -637,55 +598,10 @@ int main(int argc, const char *argv[])
         //cv::imshow("video frame", img);
         //if (cv::waitKey(10) == 27) break;
         ++cnt;
-        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(40));
 
     }
     std::cout << "finished reading" << std::endl;
-
-    //detectMotion(reader, decodeQueue, appState);
-
-/*    LibavWriter writer;
-    writer.open("write.mp4", reader.videoCodecParams());
-    writer.frameRate(fps);
-    writer.timeBase(timeBase);
-
-
-    bool foundKeyFrame = false;
-    while (buffer.size() > 0) {
-        // measurement
-        writeStart = std::chrono::system_clock::now();
-        AVPacket* packet = buffer.front();
-        //std::cout << "packet " << cnt++ << ", address: " << static_cast<void*>(packet) << ", size: " << packet->size << std::endl;
-        //std::cout << "packet " << cnt++ << ", size: " << packet->size << ", flags: " << packet->flags << std::endl;
-        if (foundKeyFrame) {
-            if (!(succ = writer.writeVideoPacket(packet))) {
-                av_packet_free(&packet);
-                buffer.pop_front();
-                break;
-            }
-        } else {
-            // start with key frame
-            if (packet->flags & AV_PKT_FLAG_KEY) {
-                foundKeyFrame= true;
-                std::cout << "found keyframe" << std::endl;
-                if (!(succ = writer.writeVideoPacket(packet))) {
-                    av_packet_free(&packet);
-                    buffer.pop_front();
-                    break;
-                }
-            }
-        }
-        av_packet_free(&packet);
-        buffer.pop_front();
-        writeEnd = std::chrono::system_clock::now();
-        long long writeDuration = std::chrono::duration_cast<std::chrono::microseconds>(writeEnd - writeStart).count();
-        writeTimes.push_back(writeDuration);
-    }
-    std::cout << "finished writing buffer" << std::endl;
-    statistics(readTimes, "read_packet in us");
-    statistics(decodeTimes, "decode_packet in ms");
-    statistics(writeTimes, "write_packet in us");
-*/
 
     appState.terminate = true;
 

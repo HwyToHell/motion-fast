@@ -6,14 +6,14 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-DEFINES += DEBUG_BUILD
+DEFINES -= DEBUG_BUILD
 
 SOURCES += \
     backgroundsubtraction.cpp \
     decode-buffer.cpp \
     libavreadwrite.cpp \
     motion-detector.cpp \
-    test.cpp \
+    motion-pi.cpp \
     time-stamp.cpp
 
 LIBS += -lavformat \
@@ -41,7 +41,8 @@ HEADERS += \
     backgroundsubtraction.h \
     libavreadwrite.h \
     motion-detector.h \
-    safequeque.h \
+    perfcounter.h \
+    safebuffer.h \
     time-stamp.h
 
 INSTALLS = target

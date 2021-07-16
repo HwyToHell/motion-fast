@@ -195,12 +195,20 @@ int LibavReader::init()
 }
 
 
+bool LibavReader::isOpen()
+{
+    return (m_idxVideoStream >=0) ? true : false;
+}
+
+
 int LibavReader::open(std::string fileName)
 {
     int ret = -1;
 
     m_inCtx = avformat_alloc_context();
 
+    // TODO set AVDict for timeout
+    // https://stackoverflow.com/questions/34034125/i-dont-know-the-time-unit-to-use-for-av-dict-set-to-set-a-timeout
     ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, nullptr);
     if (ret < 0) {
         avErrMsg("Failed to open input", ret);
@@ -243,6 +251,20 @@ int LibavReader::open(std::string fileName)
     }
 
     return 0;
+}
+
+
+bool LibavReader::playStream()
+{
+    // reader opened
+    if (m_idxVideoStream >= 0) {
+        av_read_play(m_inCtx);
+        return true;
+    } else {
+        avErrMsg("VideoReader must be opened in order to play stream");
+        return false;
+    }
+
 }
 
 
