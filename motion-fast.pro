@@ -1,7 +1,7 @@
 TEMPLATE = app
-TARGET = libav
+TARGET = motion
 CONFIG += console
-CONFIG += c++14
+CONFIG += c++17
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -13,7 +13,7 @@ SOURCES += \
     decode-buffer.cpp \
     libavreadwrite.cpp \
     motion-detector.cpp \
-    motion-pi.cpp \
+    motion-fast.cpp \
     time-stamp.cpp
 
 LIBS += -lavformat \

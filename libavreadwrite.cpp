@@ -205,14 +205,24 @@ int LibavReader::open(std::string fileName)
 {
     int ret = -1;
 
+    // dict to set RTSP timeout
+    AVDictionary* opts = nullptr;
+    av_dict_set(&opts, "stimeout", "5000000", 0);
+    av_dict_set(&opts, "rtsp_transport", "tcp", 0);
+
+    //AVDictionaryEntry *optTimeout = av_dict_get(opts, "stimeout", nullptr, 0);
+    //AVDictionaryEntry *optTransport = av_dict_get(opts, "rtsp_transport", nullptr, 0);
+
     m_inCtx = avformat_alloc_context();
 
     // TODO set AVDict for timeout
     // https://stackoverflow.com/questions/34034125/i-dont-know-the-time-unit-to-use-for-av-dict-set-to-set-a-timeout
-    ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, nullptr);
+    // ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, nullptr);
+    ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, &opts);
     if (ret < 0) {
         avErrMsg("Failed to open input", ret);
         freeOpenReader(m_inCtx);
+        // std::cout << "Error number open input: " << ret << std::endl;
         return ret;
     }
 
@@ -276,7 +286,7 @@ bool LibavReader::readVideoPacket(AVPacket*& pkt)
     for (unsigned int i = 0; i < m_inCtx->nb_streams; i++) {
         ret = av_read_frame(m_inCtx, m_packet);
         if (ret == AVERROR_EOF) {
-            std::cout << "end of file" << std::endl;
+            std::cout << "End of file or stream" << std::endl;
             return false;
         } else if (ret < 0) {
             avErrMsg("Failed to read packet", ret);
@@ -343,6 +353,10 @@ int LibavWriter::init()
     return 0;
 }
 
+bool LibavWriter::isOpen()
+{
+    return m_isOpen;
+}
 
 int LibavWriter::open(std::string file, VideoStream vStreamInfo)
 {

@@ -69,6 +69,7 @@ public:
     ~LibavWriter();
     void                close();
     int                 init();
+    bool                isOpen();
     int                 open(std::string file, VideoStream videoStreamInfo);
     bool                writeVideoPacket(AVPacket *packet);
 private:
