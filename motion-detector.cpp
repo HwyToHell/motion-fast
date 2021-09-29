@@ -46,8 +46,8 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
      * resize0.5:  2ms      bgrSub:  5ms
      * */
     //cv::blur(frame(m_roi), processedFrame, cv::Size(10,10));
-    cv::resize(frame, processedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
-    //cv::resize(frame, processedFrame, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+    //cv::resize(frame, processedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
+    cv::resize(frame, processedFrame, cv::Size(), 0.5, 0.5, cv::INTER_LINEAR);
     m_perfPre.stopCount();
 
     // detect motion in current frame
@@ -101,6 +101,9 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
 
 bool MotionDetector::isContinuousMotion(cv::Mat frame)
 {
+    // frame must be gray scale
+    assert(frame.channels() == 1);
+
     hasFrameMotion(frame);
 
     if (m_motionDuration >= m_minMotionDuration) {
@@ -147,6 +150,12 @@ int MotionDetector::minMotionIntensity() const
 int MotionDetector::motionDuration() const
 {
     return m_motionDuration;
+}
+
+
+int MotionDetector::motionIntensity() const
+{
+    return m_minMotionIntensity;
 }
 
 

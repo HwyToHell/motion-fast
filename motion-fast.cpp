@@ -1,4 +1,5 @@
 #include "libavreadwrite.h"
+#include"circularbuffer.h"
 #include "motion-detector.h"
 #include "perfcounter.h"
 #include "safebuffer.h"
@@ -48,6 +49,7 @@ struct State
     std::thread             threadMotionDetection;
     std::thread             threadWritePackets;
     Motion                  motion;
+    std::vector<SensDiag>   motionDiag;
     VideoStream             streamInfo;
     long long               errorCount;
     TimePoint               timeLastError;
@@ -68,9 +70,48 @@ enum class WriteState
 
 
 // FUNCTIONS
+bool getDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer)
+{
+    diagPicBuffer.clear();
+    size_t nSections = 6;
+    if (diagBuf.size() < nSections) {
+        std::cout << "diag buffer too small: " << diagBuf.size() << " elemnets" << std::endl;
+        return false;
+    } else {
+        size_t idxSteps = diagBuf.size() / (nSections);
+        std::cout << "ring buffer size: " << diagBuf.size() << std::endl;
+        std::cout << "idx steps: " << idxSteps << std::endl;
+        for (size_t n = 0; n <= nSections; ++n) {
+            size_t idxRingBuf = (n * idxSteps);
+            std::cout << "idx ring buffer: " << idxRingBuf << std::endl;
+
+            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
+            std::cout << "pre idx: " << preIdx << std::endl;
+            diagBuf.at(idxRingBuf).preIdx = preIdx;
+            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
+
+            // size_t idx = (diagBuf.size() - 1) - (n * idxSteps);
+            // if (n == nSections) idx = 0;
 
 
+            // diagBuf.at(idx).preIdx = - static_cast<int>(idx);
+            // diagPicBuffer.push_back(diagBuf.at(idx));
 
+        }
+
+
+        return true;
+    }
+}
+
+
+void showDiagPics(std::vector<SensDiag>& diagPicBuffer)
+{
+    for (auto diagSample : diagPicBuffer) {
+        auto idx = std::to_string(diagSample.preIdx);
+        cv::imshow("frame " + idx, diagSample.frame);
+    }
+}
 
 
 // motion detection thread func -> decode, bgrsub, notify
@@ -93,6 +134,9 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     detector.bgrSubThreshold(50);       // foreground / background gray difference
     detector.minMotionDuration(20);     // consecutive frames
     detector.minMotionIntensity(1000);  // pixels
+
+    size_t npreIdxs = 2 * static_cast<size_t>(detector.minMotionDuration());
+    CircularBuffer<SensDiag> diagBuffer(npreIdxs);
 
     /*
     cv::namedWindow("frame", cv::WINDOW_NORMAL);
@@ -136,14 +180,20 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         }
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved, time "  << decoder.frameTime(appState.streamInfo.timeBase) << " sec");
 
-
-
         // detect motion
         motion.startCount();
         bool isMotion = detector.isContinuousMotion(frame);
+
+        // buffer last frame for diagnostics
+        SensDiag sd;
+        sd.frame = frame;
+        sd.motion = detector.motionMask();
+        diagBuffer.push(sd);
+
         if (isMotion) {
             if (!appState.motion.writeInProgress) {
                 std::cout << getTimeStampMs() << " START MOTION ---------" << std::endl;
+                getDiagPics(diagBuffer, appState.motionDiag);
                 {
                     std::lock_guard<std::mutex> lock(appState.motion.startMtx);
                     appState.motion.start = true;
@@ -417,7 +467,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
 
 
-int main(int argc, const char *argv[])
+int main_motion_fast(int argc, const char *argv[])
 {
     if (argc < 2) {
         std::cout << "usage: libavreader videofile.mp4" << std::endl;
@@ -489,7 +539,7 @@ int main(int argc, const char *argv[])
                 ret = reader.open(argv[1]);
 
                 // keep trying to connect
-                if (ret == AVERROR(ETIMEDOUT) || AVERROR(ENETUNREACH)) {
+                if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH)) {
                     int remainingSeconds = 15;
                     while (remainingSeconds) {
                         std::cout << "Connection timed out, trying to re-connect in"

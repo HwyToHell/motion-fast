@@ -14,6 +14,7 @@ SOURCES += \
     libavreadwrite.cpp \
     motion-detector.cpp \
     motion-fast.cpp \
+    test/show-diag-pics.cpp \
     time-stamp.cpp
 
 LIBS += -lavformat \
@@ -22,6 +23,7 @@ LIBS += -lavformat \
         -lopencv_core \
         -lopencv_highgui \
         -lopencv_imgproc \
+        -lopencv_videoio \
         -lpthread
 
 contains(QT_ARCH, "arm") {
@@ -39,6 +41,7 @@ contains(QT_ARCH, "arm") {
 
 HEADERS += \
     backgroundsubtraction.h \
+    circularbuffer.h \
     libavreadwrite.h \
     motion-detector.h \
     perfcounter.h \

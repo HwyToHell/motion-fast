@@ -13,6 +13,8 @@ enum class Duration {frames, seconds};
 // setMotionDuration - in sec, in number of frames (alternative)
 // setMotionRoi - in cv::Rect
 
+
+// CLASSES
 class MotionDetector
 {
 public:
@@ -29,6 +31,7 @@ public:
     /* area in per cent of frame area */
     void        minMotionIntensity(int value);
     int         minMotionIntensity() const;
+    int         motionIntensity() const;
     cv::Mat     motionMask() const;
     void        resetBackground();
     /* region of interest related to upper left corner */
@@ -49,5 +52,16 @@ private:
     cv::Mat     m_motionMask;
     cv::Rect    m_roi;
 };
+
+
+struct SensDiag
+{
+    cv::Mat frame;
+    cv::Mat motion;
+    int     motionDuration;
+    int     motionIntensity;
+    int     preIdx;
+};
+
 
 #endif // MOTIONDETECTOR_H
