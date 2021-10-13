@@ -34,31 +34,38 @@ double MotionDetector::bgrSubThreshold() const
 
 bool MotionDetector::hasFrameMotion(cv::Mat frame)
 {
+    /* frame must be gray scale for this optimized version
+     * of background subtractor to work */
+    assert(frame.channels() == 1);
+
     // use full frame size, if roi is not initialized yet
     if (m_roi == cv::Rect(0,0,0,0))
         m_roi = cv::Rect(cv::Point(0,0), frame.size());
 
     // pre-processing of clipped frame
-    cv::Mat processedFrame;
     m_perfPre.startCount();
     /* performance for pre-processing HD frame on RPi:
      * blur10x10: 20ms      bgrSub: 25ms
      * resize0.5:  2ms      bgrSub:  5ms
      * */
-    //cv::blur(frame(m_roi), processedFrame, cv::Size(10,10));
-    //cv::resize(frame, processedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
-    cv::resize(frame, processedFrame, cv::Size(), 0.5, 0.5, cv::INTER_LINEAR);
+
+    // intermediate step: resize full HD frame 1920x1080 -> 480x270
+    cv::resize(frame, m_resizedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
+    // remove noise by blurring
+    int kernel = m_resizedFrame.size().width / 96;
+    cv::blur(m_resizedFrame, m_processedFrame, cv::Size(kernel,kernel));
+
     m_perfPre.stopCount();
 
     // detect motion in current frame
     m_perfApply.startCount();
-    m_bgrSub->apply(processedFrame, m_motionMask);
-    //m_bgrSub->apply(frame, m_motionMask);
+    //m_bgrSub->apply(m_resizedFrame, m_motionMask);
+    m_bgrSub->apply(m_processedFrame, m_motionMask);
 
     m_perfApply.stopCount();
     m_perfPost.startCount();
-    int motionIntensity = cv::countNonZero(m_motionMask);
-    bool isMotion = motionIntensity > m_minMotionIntensity ? true : false;
+    m_motionIntensity = cv::countNonZero(m_motionMask);
+    bool isMotion = m_motionIntensity > m_minMotionIntensity ? true : false;
 
     // DEBUG
     /*
@@ -101,9 +108,6 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
 
 bool MotionDetector::isContinuousMotion(cv::Mat frame)
 {
-    // frame must be gray scale
-    assert(frame.channels() == 1);
-
     hasFrameMotion(frame);
 
     if (m_motionDuration >= m_minMotionDuration) {
@@ -155,13 +159,25 @@ int MotionDetector::motionDuration() const
 
 int MotionDetector::motionIntensity() const
 {
-    return m_minMotionIntensity;
+    return m_motionIntensity;
 }
 
 
 cv::Mat MotionDetector::motionMask() const
 {
     return m_motionMask;
+}
+
+
+cv::Mat MotionDetector::processedFrame() const
+{
+    return m_processedFrame;
+}
+
+
+cv::Mat MotionDetector::resizedFrame() const
+{
+    return m_resizedFrame;
 }
 
 

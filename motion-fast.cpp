@@ -13,6 +13,8 @@ extern "C" {
 #include "ffmpeg/buffer_internal.h"
 }
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/utils/filesystem.hpp>
 
 // std
 #include <atomic>
@@ -58,7 +60,8 @@ struct State
     bool                    reset;
     bool                    resetDone;
     bool                    terminate;
-    char                    avoidPaddingWarning1[5];
+    bool                    debug;
+    char                    avoidPaddingWarning1[4];
 };
 
 enum class WriteState
@@ -70,48 +73,20 @@ enum class WriteState
 
 
 // FUNCTIONS
-bool getDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer)
-{
-    diagPicBuffer.clear();
-    size_t nSections = 6;
-    if (diagBuf.size() < nSections) {
-        std::cout << "diag buffer too small: " << diagBuf.size() << " elemnets" << std::endl;
-        return false;
-    } else {
-        size_t idxSteps = diagBuf.size() / (nSections);
-        std::cout << "ring buffer size: " << diagBuf.size() << std::endl;
-        std::cout << "idx steps: " << idxSteps << std::endl;
-        for (size_t n = 0; n <= nSections; ++n) {
-            size_t idxRingBuf = (n * idxSteps);
-            std::cout << "idx ring buffer: " << idxRingBuf << std::endl;
+int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState);
+bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer);
+void printAVErrorCodes();
+void printDetectionParams(SensDiag& diagSample);
+bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue,
+                        PacketSafeCircularBuffer& preCaptureBuffer, State& appState);
+void resetWriter(State& appState, WriteState& writeState, LibavWriter& writer);
+long long secondsWithoutError(State& appState);
+void showDiagPics(std::vector<SensDiag>& diagPicBuffer);
+void terminateThreads(PacketSafeQueue& packetQueue, PacketSafeCircularBuffer& buffer, State& appState);
+void waitForMotion(State& appState);
+bool writeDiagPicsToDisk(std::vector<SensDiag>& diagPicBuffer);
+int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState);
 
-            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
-            std::cout << "pre idx: " << preIdx << std::endl;
-            diagBuf.at(idxRingBuf).preIdx = preIdx;
-            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
-
-            // size_t idx = (diagBuf.size() - 1) - (n * idxSteps);
-            // if (n == nSections) idx = 0;
-
-
-            // diagBuf.at(idx).preIdx = - static_cast<int>(idx);
-            // diagPicBuffer.push_back(diagBuf.at(idx));
-
-        }
-
-
-        return true;
-    }
-}
-
-
-void showDiagPics(std::vector<SensDiag>& diagPicBuffer)
-{
-    for (auto diagSample : diagPicBuffer) {
-        auto idx = std::to_string(diagSample.preIdx);
-        cv::imshow("frame " + idx, diagSample.frame);
-    }
-}
 
 
 // motion detection thread func -> decode, bgrsub, notify
@@ -133,9 +108,9 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     MotionDetector detector;
     detector.bgrSubThreshold(50);       // foreground / background gray difference
     detector.minMotionDuration(20);     // consecutive frames
-    detector.minMotionIntensity(1000);  // pixels
+    detector.minMotionIntensity(300);  // pixels
 
-    size_t npreIdxs = 2 * static_cast<size_t>(detector.minMotionDuration());
+    size_t npreIdxs = static_cast<size_t>(detector.minMotionDuration()) + 1;
     CircularBuffer<SensDiag> diagBuffer(npreIdxs);
 
     /*
@@ -185,15 +160,18 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         bool isMotion = detector.isContinuousMotion(frame);
 
         // buffer last frame for diagnostics
+        // TODO integrate into MotionDetector class
         SensDiag sd;
-        sd.frame = frame;
-        sd.motion = detector.motionMask();
+        sd.frame = detector.resizedFrame().clone();
+        sd.motion = detector.motionMask().clone();
+        sd.motionDuration = detector.motionDuration();
+        sd.motionIntensity = detector.motionIntensity();
         diagBuffer.push(sd);
 
         if (isMotion) {
             if (!appState.motion.writeInProgress) {
                 std::cout << getTimeStampMs() << " START MOTION ---------" << std::endl;
-                getDiagPics(diagBuffer, appState.motionDiag);
+                createDiagPics(diagBuffer, appState.motionDiag);
                 {
                     std::lock_guard<std::mutex> lock(appState.motion.startMtx);
                     appState.motion.start = true;
@@ -243,6 +221,31 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
 }
 
 
+bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer)
+{
+    diagPicBuffer.clear();
+    size_t nSections = 4;
+    if (diagBuf.size() < nSections) {
+        std::cout << "diag buffer too small: " << diagBuf.size() << " elements" << std::endl;
+        return false;
+    } else {
+        size_t idxSteps = diagBuf.size() / (nSections);
+        for (size_t n = 0; n <= nSections; ++n) {
+            size_t idxRingBuf = (n * idxSteps);
+
+            // preIdx -> reverse index of circular buffer (head = oldest index)
+            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
+            // std::cout << "pre idx: " << preIdx << std::endl;
+            diagBuf.at(idxRingBuf).preIdx = preIdx;
+
+            printDetectionParams(diagBuf.at(idxRingBuf));
+            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
+        }
+        return true;
+    }
+}
+
+
 void printAVErrorCodes()
 {
     std::map<std::string, int> errorCodes;
@@ -255,6 +258,42 @@ void printAVErrorCodes()
     for (auto [key, value] : errorCodes) {
         std::cout << key << value << std::endl;
     }
+}
+
+
+void printDetectionParams(SensDiag& diagSample)
+{
+    const cv::Scalar blue(255,0,0);
+    const cv::Scalar green(0,255,0);
+    const cv::Scalar red(0,0,255);
+    int fontFace = cv::HersheyFonts::FONT_HERSHEY_SIMPLEX;
+    double fontScale = static_cast<double>(diagSample.frame.size().height) / 500;
+    int fontThickness = 1;
+
+    int baseLine;
+    int fontHeight = cv::getTextSize("0", fontFace, fontScale, fontThickness,
+                                     &baseLine).height;
+    int orgX = diagSample.frame.size().width / 25;
+    int orgY = diagSample.frame.size().height / 5;
+    int spaceY = diagSample.frame.size().height / 30;
+
+    if (diagSample.frame.channels() == 1) {
+        cv::cvtColor(diagSample.frame, diagSample.frame, cv::COLOR_GRAY2BGR);
+    }
+
+    // duration
+    cv::Point orgDuration(orgX, orgY);
+    std::stringstream ssDuration;
+    ssDuration << "duration: " << diagSample.motionDuration;
+    cv::putText(diagSample.frame, ssDuration.str(), orgDuration, fontFace,
+                fontScale, red, fontThickness);
+
+    // intensity
+    cv::Point orgIntensity(orgX, orgY + fontHeight + spaceY);
+    std::stringstream ssIntensity;
+    ssIntensity << "intensity: " << diagSample.motionIntensity;
+    cv::putText(diagSample.frame, ssIntensity.str(), orgIntensity, fontFace,
+                fontScale, red, fontThickness);
 }
 
 
@@ -287,7 +326,8 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
         preCaptureBuffer.push(packetPreCaptureBuffer);
 
         // non-blocking getch
-        if (rlutil::nb_getch() == 27) {
+        int pressedKey = rlutil::nb_getch();
+        if (pressedKey == 27) {
             std::cout << std::endl << "<ESC> pressed, terminating video processing" << std::endl;
             appState.terminate = true;
             return false;
@@ -323,6 +363,15 @@ long long secondsWithoutError(State& appState)
 }
 
 
+void showDiagPics(std::vector<SensDiag>& diagPicBuffer)
+{
+    for (auto diagSample : diagPicBuffer) {
+        auto idx = std::to_string(diagSample.preIdx);
+        cv::imshow("frame " + idx, diagSample.frame);
+    }
+}
+
+
 void terminateThreads(PacketSafeQueue& packetQueue, PacketSafeCircularBuffer& buffer, State& appState)
 {
     rlutil::setColor(rlutil::RED);
@@ -353,10 +402,42 @@ void waitForMotion(State& appState)
 }
 
 
+bool writeDiagPicsToDisk(std::vector<SensDiag>& diagBuf)
+{
+    std::string dirDiag = getTimeStamp(TimeResolution::sec_NoBlank);
+    if (cv::utils::fs::exists(dirDiag) && cv::utils::fs::isDirectory(dirDiag)) {
+        std::cout << "diag pic directory already exists: " << dirDiag << std::endl;
+        return false;
+    } else {
+        if (cv::utils::fs::createDirectory(dirDiag)) {
+            std::cout << "diag pic directory created: " << dirDiag << std::endl;
+            for (auto diagSample : diagBuf) {
+                std::string preIdx = std::to_string(diagSample.preIdx);
+
+                // motion mask
+                std::string fileNameMask = "mask " + preIdx + ".jpg";
+                std::string filePathRelMask =  cv::utils::fs::join(dirDiag, fileNameMask);
+                cv::imwrite(filePathRelMask, diagSample.motion);
+
+                // original frame
+                std::string fileNameOrig = "orig " + preIdx + ".jpg";
+                std::string filePathOrig =  cv::utils::fs::join(dirDiag, fileNameOrig);
+                cv::imwrite(filePathOrig, diagSample.frame);
+            } //end for
+            return true;
+        } else {
+            std::cout << "cannot create diag pic directory: " << dirDiag << std::endl;
+            return false;
+        }
+    }
+}
+
+
 // demux from buffer thread func -> write video packets, if motion present
 int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 {
     DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", thread write packets started");
+    PerfCounter writeDiagPics("writeDiagPics");
     WriteState writeState = WriteState::open;
 
     LibavWriter writer;
@@ -380,6 +461,16 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reset writer");
                 break;
             }
+
+            // write debug pics to disk
+            writeDiagPics.startCount();
+            if (appState.debug) {
+                if (!writeDiagPicsToDisk(appState.motionDiag)) {
+                    std::cout << "not able to save diag pics to disk at "
+                        << getTimeStamp(TimeResolution::sec_NoBlank) << std::endl;
+                }
+            }
+            writeDiagPics.stopCount();
 
             std::string fileName = getTimeStamp(TimeResolution::sec_NoBlank) + ".mp4";
             int ret = writer.open(fileName, appState.streamInfo);
@@ -462,12 +553,13 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
         } // end switch
     } // end while (!terminate)
+    writeDiagPics.printStatistics();
     return 0;
 }
 
 
 
-int main_motion_fast(int argc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     if (argc < 2) {
         std::cout << "usage: libavreader videofile.mp4" << std::endl;
@@ -522,6 +614,7 @@ int main_motion_fast(int argc, const char *argv[])
     }
     appState.errorCount = 0;
     appState.timeLastError = std::chrono::system_clock::now();
+    appState.debug = true;
 
     PacketSafeQueue decodeQueue;
     appState.threadMotionDetection = std::thread(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));

@@ -33,7 +33,9 @@ public:
     int         minMotionIntensity() const;
     int         motionIntensity() const;
     cv::Mat     motionMask() const;
+    cv::Mat     processedFrame() const;
     void        resetBackground();
+    cv::Mat     resizedFrame() const;
     /* region of interest related to upper left corner */
     void        roi(cv::Rect);
     cv::Rect    roi() const;
@@ -49,7 +51,10 @@ private:
     int         m_minMotionDuration;
     int         m_minMotionIntensity;
     int         m_motionDuration;
+    int         m_motionIntensity;
     cv::Mat     m_motionMask;
+    cv::Mat     m_resizedFrame;
+    cv::Mat     m_processedFrame;
     cv::Rect    m_roi;
 };
 

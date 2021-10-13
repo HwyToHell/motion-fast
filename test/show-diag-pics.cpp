@@ -2,18 +2,23 @@
 #include "../circularbuffer.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <sstream>
 
 // defined in motion-fast
-bool getDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer);
+bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer);
 
 
 void printFrameNum(cv::Mat& frame, int num)
 {
+    const cv::Scalar blue(255,0,0);
+    const cv::Scalar green(0,255,0);
     const cv::Scalar red(0,0,255);
     int font = cv::HersheyFonts::FONT_HERSHEY_SIMPLEX;
     double fontScale = 1;
     cv::Point org(10, 40);
-    cv::putText(frame, std::to_string(num), org, font, fontScale, red, 2);
+    std::stringstream ss;
+    ss << "frame:    " << num;
+    cv::putText(frame, ss.str(), org, font, fontScale, green, 2);
 }
 
 
@@ -56,7 +61,7 @@ void showDiag(std::vector<SensDiag>& diag)
 
 
         // show motion mask
-        yOrg = winHeight + 50;
+        yOrg = winHeight + 70;
         std::string caption_mask = "mask: frame " + idx;
         cv::namedWindow(caption_mask, cv::WINDOW_NORMAL);
         cv::imshow(caption_mask, diagSample.motion);
@@ -69,7 +74,7 @@ void showDiag(std::vector<SensDiag>& diag)
 
 
 
-int main(int argc, const char *argv[])
+int main_show_diag_pics(int argc, const char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -87,7 +92,7 @@ int main(int argc, const char *argv[])
     // return 0;
 
     std::vector<SensDiag>       motionDiag;
-    CircularBuffer<SensDiag>    diagBuffer(61);
+    CircularBuffer<SensDiag>    diagBuffer(31);
     cv::Mat frame, gray;
     std::cout << "Hit ESC to break" << std::endl;
 
@@ -104,7 +109,10 @@ int main(int argc, const char *argv[])
 
         // put time stamp or number on pic
         printFrameNum(frame, n);
-        cv::imshow("frame", frame);
+        cv::Mat resized, blurred;
+        cv::resize(frame, resized, cv::Size(), 0.5, 0.5, cv::INTER_LINEAR);
+        cv::blur(resized, blurred, cv::Size(5,5));
+        cv::imshow("frame", blurred);
         //if (cv::waitKey(20) == 27) break;
         //continue;
 
@@ -113,7 +121,7 @@ int main(int argc, const char *argv[])
 
         // buffer last frame for diagnostics
         SensDiag sd;
-        sd.frame = frame.clone();
+        sd.frame = detector.processedFrame().clone();
         sd.motion = detector.motionMask().clone();
         sd.motionDuration = detector.motionDuration();
         sd.motionIntensity = detector.motionIntensity();
@@ -122,7 +130,7 @@ int main(int argc, const char *argv[])
 
         if (isMotion) {
             std::cout << "--- START MOTION ---------" << std::endl;
-            getDiagPics(diagBuffer, motionDiag);
+            createDiagPics(diagBuffer, motionDiag);
             break;
         }
 
