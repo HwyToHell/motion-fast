@@ -205,8 +205,9 @@ int LibavReader::open(std::string fileName)
 {
     int ret = -1;
 
-    // dict to set RTSP timeout
+    // dict for setting RTSP timeout
     AVDictionary* opts = nullptr;
+    // set timeout in microseconds -> 5 sec
     av_dict_set(&opts, "stimeout", "5000000", 0);
     av_dict_set(&opts, "rtsp_transport", "tcp", 0);
 

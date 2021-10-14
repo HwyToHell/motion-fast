@@ -10,3 +10,7 @@
 - diag-pic
    - at each new motion detection pre-buffered motion pictures  aredetermine settings for real time analysis on raspberry pi
    - video source: HD webcam (HQCAM - rtsp stream)
+
+### Usage
+- run: motion rtsp://admin:@192.168.1.10
+- enable diagPics in main: appState.debug = true;

@@ -8,11 +8,6 @@
 // color cursor and getkey
 #include "../cpp/inc/rlutil.h"
 
-// TODO delete
-extern "C" {
-#include "ffmpeg/buffer_internal.h"
-}
-
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/utils/filesystem.hpp>
 
@@ -35,11 +30,23 @@ extern "C" {
 
 
 // CLASSES
+struct Detector
+{
+    double      bgrSubThreshold;
+    int         minMotionDuration;
+    int         minMotionIntensity;
+    cv::Rect    roi;
+    double      scaleFrame;
+    bool        debug;
+    char        avoidPaddingWarning1[7];
+};
+
+
 struct Motion
 {
     std::condition_variable startCnd;
     std::mutex              startMtx;
-    int                     postCapture;
+    int                     postCapture; // preCapture determined by key frame distance
     bool                    start;
     std::atomic_bool        stop;
     bool                    writeInProgress;
@@ -50,6 +57,7 @@ struct State
 {
     std::thread             threadMotionDetection;
     std::thread             threadWritePackets;
+    Detector                detector;
     Motion                  motion;
     std::vector<SensDiag>   motionDiag;
     VideoStream             streamInfo;
@@ -106,9 +114,9 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     cv::Mat frame;
 
     MotionDetector detector;
-    detector.bgrSubThreshold(50);       // foreground / background gray difference
-    detector.minMotionDuration(20);     // consecutive frames
-    detector.minMotionIntensity(300);  // pixels
+    detector.bgrSubThreshold(appState.detector.bgrSubThreshold);       // foreground / background gray difference
+    detector.minMotionDuration(appState.detector.minMotionDuration);   // consecutive frames
+    detector.minMotionIntensity(appState.detector.minMotionIntensity); // pixels
 
     size_t npreIdxs = static_cast<size_t>(detector.minMotionDuration()) + 1;
     CircularBuffer<SensDiag> diagBuffer(npreIdxs);
@@ -131,6 +139,8 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         int cntDecoded = 0;
         bool badDecode = false;
 
+        size_t queueSize = packetQueue.size();
+
         while (packetQueue.pop(packet)) {
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet " << cntDecoded << " popped, pts: " << packet->pts << ", size: " << packet->size);
             if (appState.terminate) break;
@@ -138,12 +148,18 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
             if ((badDecode = !decoder.decodePacket(packet))) {
                 std::cout << "Failed to decode packet for motion detection" << std::endl;
             }
+            queueSize = (packetQueue.size() > queueSize) ? packetQueue.size() : queueSize;
+
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded, queueSize: " << packetQueue.size());
             decode.stopCount();
 
             av_packet_unref(packet);
-            // count decoded packets for debugging purposes
+            // debug: count decoded packets
             ++cntDecoded;
+        }
+
+        if (queueSize > 1) {
+            std::cout << "queue of size: " << queueSize << " discharged at " << decoder.frameTime(appState.streamInfo.timeBase) << " sec" << std::endl;
         }
 
         // skip motion detection for partly decoded frames
@@ -209,14 +225,15 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     decoder.close();
 
 
-    /*
-    motion.printStatistics();
+
     detector.m_perfPre.printStatistics();
     detector.m_perfApply.printStatistics();
     detector.m_perfPost.printStatistics();
     decode.printStatistics();
     //decode.printAllSamples();
-    */
+    motion.printStatistics();
+    //motion.printAllSamples();
+
     return 0;
 }
 
@@ -566,30 +583,11 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    /*
-    printAVErrorCodes();
-    return 0;
-
-    rlutil::setColor(rlutil::RED);
-    std::cout << "Connection timed out, trying to re-connect in "
-              << std::setw(3) << 100 << " sec" << std::endl; //"\r";
-    rlutil::resetColor();
-
-    std::cout << "Connection timed out, trying to re-connect in "
-              << std::setw(3) << 1 << " sec" << std::endl; //"\r";
-
-    //std::cout.flush();
-
-    //testRefAVBuffer(argv[1]);
-    // testNewDecoder(argv[1]);
-    // return 0;
-    */
-
     avformat_network_init();
     LibavReader reader;
     reader.init();
 
-    // TODO check input stream
+    // TODO check input stream before opening
     int ret = reader.open(argv[1]);
     if (ret < 0) {
         std::cout << "Error opening input: " << argv[1] << std::endl;
@@ -601,13 +599,19 @@ int main(int argc, const char *argv[])
     // prepare for motion detection thread
     // TODO refactor State as class with initializing valid state
     State appState;
-    appState.motion.start = false; // needs lock, if detection thread already running
+    appState.detector.bgrSubThreshold = 40;     // foreground / background gray difference
+    appState.detector.minMotionDuration = 30;   // consecutive frames
+    appState.detector.minMotionIntensity = 80;  // pixels
+
+    appState.motion.start = false; // needs lock, if detection thread is already running
     appState.motion.stop = true;
     appState.motion.writeInProgress = false;
     appState.motion.postCapture = 25;
+
     appState.reset = false;
     appState.resetDone = false;
     appState.terminate = false;
+
     if (!reader.getVideoStreamInfo(appState.streamInfo)) {
         std::cout << "Failed to get video stream info" << std::endl;
         return -1;

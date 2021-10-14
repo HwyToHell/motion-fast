@@ -17,11 +17,9 @@ mean: 6.6 max: 141
 95%:  51.1486
 
 
-
 ======================================================
 RPi 4-63
 Read Write Packet typisch kleiner 1 ms
-
 ===================================
 read_packet in us
 mean: 139.938 max: 895
@@ -36,3 +34,106 @@ mean: 29.7106 max: 109
 write_packet in us
 mean: 59.964 max: 1082
 95%:  463.499
+
+
+
+======================================================
+Desktop 2021-10-13
+Motion Detection Performance
+===================================
+decoding
+mean: 10.9725 max: 51
+95%:  28.5343
+===================================
+motion detection
+mean: 0.930233 max: 6
+95%:  2.90976
+===================================
+pre-process
+mean: 0.488372 max: 4
+95%:  1.89965
+===================================
+bgrSub
+mean: 0.0232558 max: 2
+95%:  0.414249
+===================================
+cntNonZero
+mean: 0 max: 0
+95%:  0
+
+
+======================================================
+RPi 4-63 2021-10-13
+Motion Detection Performance
+===================================
+decoding
+mean: 30.8792 max: 193
+95%:  59.877
+===================================
+motion detection
+mean: 3.067 max: 39
+95%:  4.8122
+===================================
+pre-process
+mean: 2.01447 max: 36
+95%:  3.39764
+===================================
+bgrSub
+mean: 1.00207 max: 6
+95%:  1.20539
+===================================
+cntNonZero
+mean: 0 max: 0
+95%:  0
+
+
+
+
+======================================================
+RPi 4-63 2021-10-14
+- decoding 25 ms on average
+- key frames ~70 ms, first frame ~150 ms
+- motion detection 4 ms on average
+- after initial decodeBuffer discharge phase of ~50 frames
+  the decodeBuffer won't hold more than 2 frames (see below)
+  -> 40 ms (@25 fps) are enough for continuous processing
+===================================
+decoding
+mean: 25.9985 max: 140
+95%:  45.45
+===================================
+motion detection
+mean: 3.29978 max: 11
+95%:  4.71223
+===================================
+pre-process
+mean: 2.03282 max: 7
+95%:  2.62827
+===================================
+bgrSub
+mean: 1.01094 max: 3
+95%:  1.29075
+===================================
+cntNonZero
+mean: 0 max: 0
+95%:  0
+===================================
+writeDiagPics (5 samples for orig frame and motion mask)
+mean: 39 max: 39
+95%:  39
+
+
+pi@pi4-63:~ $ ./motion rtsp://admin:@192.168.1.10
+Video input opened successfully: rtsp://admin:@192.168.1.10
+Hit <ESC> to terminate video processing
+queue of size: 50 discharged at 5.6 sec
+queue of size: 2 discharged at 11.2 sec
+queue of size: 2 discharged at 12.16 sec
+2021-10-14 13:20:00.380 START MOTION ---------
+diag pic directory created: 2021-10-14_13h20m00s
+queue of size: 2 discharged at 21.12 sec
+2021-10-14 13:20:03.799 STOP MOTION ----------
+queue of size: 2 discharged at 22.12 sec
+queue of size: 2 discharged at 24.16 sec
+queue of size: 2 discharged at 26.12 sec
+
