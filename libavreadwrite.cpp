@@ -22,6 +22,7 @@ void errLog(const char * file, int line, std::string msg, int avError)
 
 
 /*** LibavDecoder ************************************************************/
+
 LibavDecoder::LibavDecoder() :
     m_codec(nullptr),
     m_codecCtx(nullptr),
@@ -220,6 +221,9 @@ int LibavReader::open(std::string fileName)
     // https://stackoverflow.com/questions/34034125/i-dont-know-the-time-unit-to-use-for-av-dict-set-to-set-a-timeout
     // ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, nullptr);
     ret = avformat_open_input(&m_inCtx, fileName.c_str(), nullptr, &opts);
+    // release opts to avoid memory leak
+    av_dict_free(&opts);
+
     if (ret < 0) {
         avErrMsg("Failed to open input", ret);
         freeOpenReader(m_inCtx);

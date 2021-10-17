@@ -45,7 +45,10 @@ public:
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wall"
         // std::vector<long long>::iterator itMax = std::max_element(m_samples.begin(), m_samples.end());
-        long long max = *(std::max_element(m_samples.begin(), m_samples.end()));
+        long long max = 0;
+        if (m_samples.size() != 0) {
+            max = *(std::max_element(m_samples.begin(), m_samples.end()));
+        }
         // long long max = *itMax;
         #pragma GCC diagnostic pop
 

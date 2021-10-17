@@ -1,5 +1,5 @@
 #include "libavreadwrite.h"
-#include"circularbuffer.h"
+#include "circularbuffer.h"
 #include "motion-detector.h"
 #include "perfcounter.h"
 #include "safebuffer.h"
@@ -225,13 +225,12 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     decoder.close();
 
 
-
+    decode.printStatistics();
+    motion.printStatistics();
     detector.m_perfPre.printStatistics();
     detector.m_perfApply.printStatistics();
     detector.m_perfPost.printStatistics();
-    decode.printStatistics();
     //decode.printAllSamples();
-    motion.printStatistics();
     //motion.printAllSamples();
 
     return 0;
@@ -576,7 +575,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
 
 
-int main(int argc, const char *argv[])
+int main_motion_fast(int argc, const char *argv[])
 {
     if (argc < 2) {
         std::cout << "usage: libavreader videofile.mp4" << std::endl;
@@ -618,7 +617,7 @@ int main(int argc, const char *argv[])
     }
     appState.errorCount = 0;
     appState.timeLastError = std::chrono::system_clock::now();
-    appState.debug = true;
+    appState.debug = false;
 
     PacketSafeQueue decodeQueue;
     appState.threadMotionDetection = std::thread(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));

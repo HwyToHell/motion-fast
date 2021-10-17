@@ -14,6 +14,7 @@ SOURCES += \
     libavreadwrite.cpp \
     motion-detector.cpp \
     motion-fast.cpp \
+    test/avreadwrite-test.cpp \
     test/show-diag-pics.cpp \
     time-stamp.cpp
 
