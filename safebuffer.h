@@ -54,7 +54,7 @@ public:
             if (isKeyFrame(packet)) {
                 return true;
             }
-            av_packet_unref(packet);
+            av_packet_free(&packet);
         }
         return false;
     }

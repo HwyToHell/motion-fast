@@ -153,7 +153,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded, queueSize: " << packetQueue.size());
             decode.stopCount();
 
-            av_packet_unref(packet);
+            av_packet_free(&packet);
             // debug: count decoded packets
             ++cntDecoded;
         }
@@ -220,7 +220,6 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
 
     }
 
-    av_packet_free(&packet);
     // cv::destroyAllWindows();
     decoder.close();
 
@@ -324,12 +323,14 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
     int packetsRead = 0;
     while (succ) {
 
+        // free packetDecoder in detectMotion thread
         if (!(succ = reader.readVideoPacket(packetDecoder))) break;
 
         //std::cout << "read packet " << cnt++ << ", pts: " << packet->pts << ", size: " << packet->size << std::endl;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet read, pts: " << packetDecoder->pts );
 
         // clone packet for pre-capture buffer
+        // free packetPreCaptureBuffer in writeMotionPackets thread
         AVPacket* packetPreCaptureBuffer = av_packet_clone(packetDecoder);
         if(!packetPreCaptureBuffer) {
             std::cout << "nullptr packet motion buffer -> break" << std::endl;
@@ -500,6 +501,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
             AVPacket* packet;
             if (buffer.popToNextKeyFrame(packet)) {
                 writer.writeVideoPacket(packet);
+                av_packet_free(&packet);
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", key frame written");
             } else {
                 std::cout << "no key frame found -> close output file" << std::endl;
@@ -509,6 +511,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
             // drain pre-capture buffer
             while(buffer.pop(packet)) {
                 writer.writeVideoPacket(packet);
+                av_packet_free(&packet);
             }
 
             // reset -> close writer, stay in open state
@@ -531,6 +534,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
             while(buffer.pop(packet)) {
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet popped (pts: " << packet->pts << ")");
                 writer.writeVideoPacket(packet);
+                av_packet_free(&packet);
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet written");
 
                 // reset -> open
@@ -555,6 +559,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
             AVPacket* packet;
             while(buffer.pop(packet)) {
                 writer.writeVideoPacket(packet);
+                av_packet_free(&packet);
                 DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", post-capture packet written, remaining: " << postCapture);
 
                 // reset -> open
@@ -575,10 +580,10 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
 
 
-int main_motion_fast(int argc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     if (argc < 2) {
-        std::cout << "usage: libavreader videofile.mp4" << std::endl;
+        std::cout << "usage: motion <videofile or stream>" << std::endl;
         return -1;
     }
 
@@ -617,7 +622,7 @@ int main_motion_fast(int argc, const char *argv[])
     }
     appState.errorCount = 0;
     appState.timeLastError = std::chrono::system_clock::now();
-    appState.debug = false;
+    appState.debug = true;
 
     PacketSafeQueue decodeQueue;
     appState.threadMotionDetection = std::thread(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));

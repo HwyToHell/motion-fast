@@ -19,6 +19,8 @@
 - src, header flat in project directory
     - packet-buffer.cpp
       first prototype, derived from libav remuxing.c example
+    - libavreadwrite-test.cpp
+      test packet buffer (alloc, ref-count) by reading mp4 video file
 - __test__
     - [show-diag-pics.cpp](show-diag-pics.cpp)
       test motion detection diagnostics

@@ -53,6 +53,7 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
     cv::resize(frame, m_resizedFrame, cv::Size(), 0.25, 0.25, cv::INTER_LINEAR);
     // remove noise by blurring
     int kernel = m_resizedFrame.size().width / 96;
+    if (kernel == 0) kernel = 2;
     cv::blur(m_resizedFrame, m_processedFrame, cv::Size(kernel,kernel));
 
     m_perfPre.stopCount();

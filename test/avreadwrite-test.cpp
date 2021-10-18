@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-int main(int argc, char *argv[])
+int main_avreadwrite_test(int argc, char *argv[])
 {
     if (argc < 2) {
         std::cout << "usage: avreadwrite videofile.mp4" << std::endl;
