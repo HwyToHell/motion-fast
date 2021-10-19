@@ -137,3 +137,21 @@ queue of size: 2 discharged at 22.12 sec
 queue of size: 2 discharged at 24.16 sec
 queue of size: 2 discharged at 26.12 sec
 
+
+
+
+======================================================
+Desktop 2021-10-19
+- paket vom RTSP stream lesen: durchschnittlich knapp 40 ms (max. 90 ms)
+- stream über ffserver / ffmpeg mit libx264 generiert (1920x1080)
+- TODO: test mit HQCAM und raspberry pi
+===================================
+read packet
+mean: 35.4291 max: 85
+95%:  73.1644
+===================================
+store packet
+mean: 0.0169205 max: 4
+95%:  0.40131
+===================================
+

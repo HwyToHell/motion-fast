@@ -3,13 +3,17 @@
 ## Detect motion on webcam video stream and save video sequences to disk
 
 ### Branches
+- dev
+   - development branch (merge with main, if stable)
 - main
    - motion analyzer service for linux and raspberry pi
    - video source: HD webcam (HQCAM - rtsp stream)
    - motion footage will be saved to SD card as they are detected
-- diag-pic
-   - at each new motion detection pre-buffered motion pictures  aredetermine settings for real time analysis on raspberry pi
-   - video source: HD webcam (HQCAM - rtsp stream)
+- test/mem-usage
+   - test memory usage on raspberry pi in order to estimate long term stability
+   - in debug mode: generate at each new motion detection pre-buffered motion pictures
+   - used to determine settings for real time analysis on raspberry pi
+   - video source: RTST stream (HQCAM or ffserver)
 
 ### Usage
 - run: motion rtsp://admin:@192.168.1.10

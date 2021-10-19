@@ -320,12 +320,19 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
     std::cout << "Hit <ESC> to terminate video processing" << std::endl;
 
     //reader.playStream();
+    PerfCounter readPacket("read packet");
+    PerfCounter storePacket("store packet");
     int packetsRead = 0;
     while (succ) {
-
+        readPacket.startCount();
         // free packetDecoder in detectMotion thread
-        if (!(succ = reader.readVideoPacket(packetDecoder))) break;
+        if (!(succ = reader.readVideoPacket(packetDecoder))) {
+            std::cout << "packet was not read" << std::endl;
+            break;
+        }
+        readPacket.stopCount();
 
+        storePacket.startCount();
         //std::cout << "read packet " << cnt++ << ", pts: " << packet->pts << ", size: " << packet->size << std::endl;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", packet read, pts: " << packetDecoder->pts );
 
@@ -347,14 +354,21 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
         if (pressedKey == 27) {
             std::cout << std::endl << "<ESC> pressed, terminating video processing" << std::endl;
             appState.terminate = true;
+            readPacket.printStatistics();
+            storePacket.printStatistics();
+            readPacket.printAllSamples();
             return false;
         }
         ++packetsRead;
         if (!(packetsRead % 1500)) {
             std::cout << getTimeStampMs() << " packets read: " << packetsRead << std::endl;
         }
+        storePacket.stopCount();
     }
     std::cout << "Video processing discontinued" << std::endl;
+    readPacket.printStatistics();
+    storePacket.printStatistics();
+    readPacket.printAllSamples();
     return true;
 }
 

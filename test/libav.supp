@@ -1,0 +1,146 @@
+### valgrind suppression file for motion-fast project                       ###
+### suppressing linux and 3rd party lib error messages                      ### 
+
+# conditional jump depends on uninitialized value
+{
+   QXcbGlxWindow-01
+   Memcheck:Cond
+   fun:__wmemchr_avx2
+   fun:internal_fnwmatch
+   fun:fnmatch@@GLIBC_2.2.5
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   fun:__scandir_tail
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
+{
+   QXcbGlxWindow-02
+   Memcheck:Cond
+   fun:__wmemchr_avx2
+   fun:internal_fnwmatch
+   fun:fnmatch@@GLIBC_2.2.5
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   fun:__scandir_tail
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   obj:/usr/lib/x86_64-linux-gnu/libGLX_mesa.so.0.0.0
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
+
+# leak-check
+{
+   CvWindow-001
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
+
+{
+   i965_dri
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   obj:/usr/lib/x86_64-linux-gnu/dri/i965_dri.so
+}
+
+{
+   libgdk
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   fun:*
+   fun:*
+   fun:*
+   fun:*
+   obj:/usr/lib/x86_64-linux-gnu/libgdk-3.so.0.2200.30
+}
+
+{
+   libglib
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   fun:*
+   fun:*
+   fun:*
+   fun:*
+   obj:/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.5600.4
+}
+
+{
+   libgobject
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   fun:*
+   fun:*
+   obj:/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0.5600.4
+}
+
+{
+   libfont
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.10.1
+}
+
+{
+   QGuiApp
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+}
+
+{
+   QWidget-04
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
+{
+   QWidget-05
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:*alloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
+{
+   QWidget-06
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:malloc
+   fun:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN13QXcbGlxWindow12createVisualEv
+}
