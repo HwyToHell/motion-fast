@@ -330,6 +330,7 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
             std::cout << "packet was not read" << std::endl;
             break;
         }
+        std::cout << "read packet " << packetsRead << ", pts: " << packetDecoder->pts << ", size: " << packetDecoder->size << std::endl;
         readPacket.stopCount();
 
         storePacket.startCount();
