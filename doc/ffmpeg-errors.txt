@@ -1,0 +1,6 @@
+AVERROR_INVALIDDATA
+Invalid data found when processing input
+
+
+Error codes in error.h
+https://ffmpeg.org/doxygen/trunk/error_8h_source.html

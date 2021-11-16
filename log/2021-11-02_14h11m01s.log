@@ -1,0 +1,119 @@
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 14:05:01
+/home/pi/bin/restart-motion.sh: Zeile 20: rm-old-videos.sh: Kommando nicht gefunden.
+qt.qpa.screen: QXcbConnection: Could not connect to display 
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 14:10:01
+qt.qpa.screen: QXcbConnection: Could not connect to display 
+Could not connect to any X display.
+path to clean from old video files: /home/pi
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 14:22:02
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display 
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 14:27:02
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 14:41:01
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 15:00:01
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 15:20:03
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 15:37:03
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 17:08:01
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-01 17:15:01
+
+XAUTHORITY
+path to clean from old video files: /home/pi
+qt.qpa.screen: QXcbConnection: Could not connect to display 
+Could not connect to any X display.
+Connected to 192.168.1.10
+Camera time set to: 2021-11-02 12:13:01
+path to clean from old video files: /home/pi
+2021-11-02 12:13:04.390 Open video input: rtsp://admin:@192.168.1.10
+2021-11-02 12:13:05.391 Send SIGUSR1 to PID 1121 to terminate video processing
+2021-11-02 12:13:10.57 queue of size: 51 discharged at 6.48 sec
+2021-11-02 12:13:20.887 START MOTION ---------
+2021-11-02 12:13:45.168 STOP MOTION ----------
+2021-11-02 12:14:32.161 START MOTION ---------
+2021-11-02 12:14:35.80 STOP MOTION ----------
+send SIGUSR1 to 1121
+wait 5 sec for process to finish
+SIGUSR1 received
+
+2021-11-02 12:16:01.319 SIGUSR1 received, terminating video processing
+[22;31m2021-11-02 12:16:01.320 Terminate application
+[0m2021-11-02 12:16:01.320 Waiting for worker threads to join
+2021-11-02 12:16:01.349 Motion detection thread joined
+2021-11-02 12:16:01.350 Write packets thread joined
+Connected to 192.168.1.10
+Camera time set to: 2021-11-02 12:16:05
+path to clean from old video files: /home/pi
+2021-11-02 12:16:08.331 Open video input: rtsp://admin:@192.168.1.10
+2021-11-02 12:16:09.331 Send SIGUSR1 to PID 1206 to terminate video processing
+2021-11-02 12:16:13.73 queue of size: 50 discharged at 5.56 sec
+2021-11-02 12:16:31.482 START MOTION ---------
+2021-11-02 12:16:37.23 STOP MOTION ----------
+2021-11-02 12:16:41.862 START MOTION ---------
+2021-11-02 12:16:44.180 STOP MOTION ----------
+2021-11-02 12:17:08.17 START MOTION ---------
+2021-11-02 12:17:21.378 STOP MOTION ----------
+2021-11-02 12:17:37.293 START MOTION ---------
+2021-11-02 12:17:43.629 STOP MOTION ----------
+2021-11-02 12:17:49.637 START MOTION ---------
+2021-11-02 12:17:52.651 STOP MOTION ----------
+2021-11-02 12:17:56.250 START MOTION ---------
+2021-11-02 12:18:01.467 STOP MOTION ----------
+2021-11-02 12:19:29.318 START MOTION ---------
+2021-11-02 12:19:34.155 STOP MOTION ----------
+2021-11-02 12:20:15.352 START MOTION ---------
+2021-11-02 12:20:33.780 STOP MOTION ----------
+2021-11-02 12:20:42.989 START MOTION ---------
+2021-11-02 12:20:46.451 STOP MOTION ----------
+2021-11-02 12:20:48.865 START MOTION ---------
+2021-11-02 12:21:05.23 STOP MOTION ----------
+2021-11-02 12:21:48.697 START MOTION ---------
+2021-11-02 12:21:52.15 STOP MOTION ----------
+2021-11-02 12:22:04.694 START MOTION ---------
+2021-11-02 12:22:14.639 STOP MOTION ----------
+2021-11-02 12:22:35.971 START MOTION ---------
+2021-11-02 12:22:39.90 STOP MOTION ----------
+2021-11-02 12:22:49.690 START MOTION ---------
+2021-11-02 12:22:52.250 STOP MOTION ----------
+2021-11-02 12:23:00.927 START MOTION ---------
+2021-11-02 12:23:06.128 STOP MOTION ----------
+2021-11-02 12:23:15.126 START MOTION ---------
+2021-11-02 12:23:30.417 STOP MOTION ----------
+2021-11-02 12:24:38.912 START MOTION ---------
+2021-11-02 12:24:43.872 STOP MOTION ----------
+SIGUSR1 received
+
+2021-11-02 12:37:42.786 SIGUSR1 received, terminating video processing
+[22;31m2021-11-02 12:37:42.786 Terminate application
+[0m2021-11-02 12:37:42.786 Waiting for worker threads to join
+2021-11-02 12:37:42.815 Motion detection thread joined
+2021-11-02 12:37:42.815 Write packets thread joined
+restart motion process

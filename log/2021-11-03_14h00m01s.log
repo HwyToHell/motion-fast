@@ -1,0 +1,18 @@
+Log saved to: /home/pi/2021-11-02_14h14m06s.log
+Device manager connected to 192.168.1.10
+Camera time set to: 2021-11-02 14:14:06
+Device manager disconnected
+Path to clean from old video files: /home/pi
+2021-11-02 14:14:08.389 Open video input: rtsp://admin:@192.168.1.10
+2021-11-02 14:14:09.390 Send SIGUSR1 to PID 1728 to terminate video processing
+2021-11-02 14:14:13.745 queue of size: 50 discharged at 6.16 sec
+2021-11-02 14:19:38.87 START MOTION ---------
+2021-11-02 14:19:57.965 STOP MOTION ----------
+SIGUSR1 received
+
+2021-11-02 14:21:18.287 SIGUSR1 received, terminating video processing
+[22;31m2021-11-02 14:21:18.287 Terminate application
+[0m2021-11-02 14:21:18.287 Waiting for worker threads to join
+2021-11-02 14:21:18.316 Motion detection thread joined
+2021-11-02 14:21:18.317 Write packets thread joined
+restart motion process

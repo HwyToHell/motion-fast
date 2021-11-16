@@ -1,0 +1,65 @@
+Log saved to: /home/pi/2021-11-06_14h00m01s.log
+Device manager connected to 192.168.1.10
+Camera time set to: 2021-11-06 14:00:02
+Device manager disconnected
+Path to clean from old video files: /home/pi
+Remove /home/pi/2021-10-29_16h16m54s.mp4
+2021-11-06 14:00:04.692 Open video input: rtsp://admin:@192.168.1.10
+2021-11-06 14:00:05.694 Send SIGUSR1 to PID 704 to terminate video processing
+2021-11-06 14:00:11.506 Queue of size: 52 discharged at 7.64 sec
+2021-11-06 14:05:18.283 START MOTION ---------
+2021-11-06 14:05:25.532 STOP MOTION ----------
+2021-11-06 14:05:46.671 START MOTION ---------
+2021-11-06 14:05:55.697 STOP MOTION ----------
+2021-11-06 14:09:21.658 START MOTION ---------
+2021-11-06 14:09:34.375 STOP MOTION ----------
+2021-11-06 14:18:36.380 START MOTION ---------
+2021-11-06 14:18:48.88 STOP MOTION ----------
+2021-11-06 14:22:27.534 START MOTION ---------
+2021-11-06 14:22:31.175 STOP MOTION ----------
+2021-11-06 14:23:55.543 START MOTION ---------
+2021-11-06 14:24:01.593 STOP MOTION ----------
+2021-11-06 14:33:12.406 START MOTION ---------
+2021-11-06 14:33:20.195 STOP MOTION ----------
+2021-11-06 14:33:50.202 START MOTION ---------
+2021-11-06 14:33:58.281 STOP MOTION ----------
+2021-11-06 14:39:00.454 START MOTION ---------
+2021-11-06 14:39:22.444 STOP MOTION ----------
+2021-11-06 14:40:31.214 START MOTION ---------
+2021-11-06 14:40:43.891 STOP MOTION ----------
+2021-11-06 14:42:58.192 START MOTION ---------
+2021-11-06 14:43:08.200 STOP MOTION ----------
+2021-11-06 14:59:43.893 START MOTION ---------
+2021-11-06 14:59:51.868 STOP MOTION ----------
+2021-11-06 15:14:01.566 START MOTION ---------
+2021-11-06 15:14:11.721 STOP MOTION ----------
+2021-11-06 15:26:08.557 START MOTION ---------
+2021-11-06 15:26:10.495 STOP MOTION ----------
+2021-11-06 15:45:34.860 START MOTION ---------
+2021-11-06 15:45:50.253 STOP MOTION ----------
+2021-11-06 15:46:45.271 START MOTION ---------
+2021-11-06 15:46:46.878 STOP MOTION ----------
+2021-11-06 15:47:25.693 START MOTION ---------
+2021-11-06 15:47:37.575 STOP MOTION ----------
+2021-11-06 15:48:04.387 START MOTION ---------
+2021-11-06 15:48:19.774 STOP MOTION ----------
+2021-11-06 15:52:01.212 START MOTION ---------
+2021-11-06 15:52:48.453 Queue of size: 89 discharged at 6765.6 sec
+2021-11-06 15:53:02.817 STOP MOTION ----------
+2021-11-06 15:56:00.217 START MOTION ---------
+2021-11-06 15:58:05.355 STOP MOTION ----------
+2021-11-06 15:58:17.129 START MOTION ---------
+2021-11-06 15:58:59.307 STOP MOTION ----------
+2021-11-06 16:50:22.684 START MOTION ---------
+2021-11-06 16:50:41.804 STOP MOTION ----------
+End of file or stream
+2021-11-06 16:53:05.485Video processing discontinued
+Reading errors: 1, seconds since last error: 10380
+Failed to open input: Invalid data found when processing input
+  (../../motion-fast/avreadwrite.cpp:243)
+2021-11-06 16:53:10.600Failed to open input: rtsp://admin:@192.168.1.10
+[22;31m2021-11-06 16:53:10.600 Terminate application
+[0m2021-11-06 16:53:10.600 Waiting for worker threads to join
+2021-11-06 16:53:10.607 Motion detection thread joined
+2021-11-06 16:53:10.607 Write packets thread joined
+restart motion process
