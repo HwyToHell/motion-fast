@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# with this shebang the script name shows up in process list,
+# if run from command line as ./upload-videos.py
+
 import os, signal, sys, time
 from threading import Event
 import pyrebase
@@ -8,6 +12,9 @@ from watchdog.events import FileSystemEventHandler
 
 path = "/home/holger/temp"
 upload_list = []
+
+### TODO set process name
+# https://stackoverflow.com/questions/2255444/changing-the-process-name-of-a-python-script/18992161
 
 
 #### handler for terminating app with SIGUSR1
