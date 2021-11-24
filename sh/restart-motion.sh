@@ -21,5 +21,5 @@ python3 /home/pi/bin/set-cam-time.py
 # start motion as background process
 /home/pi/motion rtsp://admin:@192.168.1.10 &
 
-# delete video files older than 7 days to avoid SD memory shortage
-/home/pi/bin/rm-old-videos.sh 7 /home/pi
+# delete video files older than 14 days to avoid SD memory shortage
+/home/pi/bin/rm-old-videos.sh 14 /home/pi
