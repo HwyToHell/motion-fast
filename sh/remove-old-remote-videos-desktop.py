@@ -46,7 +46,7 @@ print(f"{time_stamp()} Removing files prior to {discard_date_prior}")
 
 
 ### enable serves for firebase storage 
-sys.path.append("/home/pi/firebase") # path to credentials
+sys.path.append("/home/holger/app-dev/firebase-credentials")
 from firebaseconfig import config
 firebase = pyrebase.initialize_app(config)
 try:

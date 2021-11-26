@@ -11,7 +11,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 
-path_to_monitor = "/home/pi"
+path = "/home/holger/temp"
 upload_list = []
 
 
@@ -58,9 +58,9 @@ def set_closed(fileName):
 on_closed_handler = OnClosed()
 on_created_handler = OnCreated()
 observer = Observer()
-observer.schedule(on_closed_handler, path_to_monitor, recursive=False)
-observer.schedule(on_created_handler, path_to_monitor, recursive=False)
-print(f"{time_stamp()} Monitoring directory {path_to_monitor} for new video files", flush=True)
+observer.schedule(on_closed_handler, path, recursive=False)
+observer.schedule(on_created_handler, path, recursive=False)
+print(f"{time_stamp()} Monitoring directory {path} for new video files", flush=True)
 observer.start()
 
 
@@ -116,7 +116,7 @@ def print_upload_list():
 
 
 # enable service for firebase storage
-sys.path.append("/home/pi/firebase") # path to credentials
+sys.path.append("/home/holger/app-dev/firebase-credentials")
 from firebaseconfig import config
 firebase = pyrebase.initialize_app(config)
 

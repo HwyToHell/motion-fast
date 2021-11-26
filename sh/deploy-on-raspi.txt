@@ -1,0 +1,18 @@
+- Python packages installed (python3 -m pip <package>)
+  pyrebase
+  watchdog
+- settings changed in scripts
+  upload-videos.py:
+    path_to_monitor = "/home/pi"
+    sys.path.append("/home/pi/firebase") # path to credentials
+  remove-old-remote-videos.py
+    sys.path.append("/home/pi/firebase") # path to credentials
+    discard_days_prior = 5
+- copy binaries to /home/pi/bin
+  restart-motion.sh
+  upload-videos.py
+  remove-old-remote-videos.py
+- copy credentials to /home/pi/firebase
+  firebaseconfig.py
+  serviceAccountKey.json
+  
