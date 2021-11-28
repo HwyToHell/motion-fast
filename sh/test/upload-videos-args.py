@@ -133,7 +133,7 @@ def print_upload_list():
 
 
 # enable service for firebase storage
-sys.path.append(path_to_credentials)
+sys.path.append(path_to_credentials) # path to credentials
 service_acct_file = path_to_credentials + "/serviceAccountKey.json"
 from firebaseconfig import config
 config["serviceAccount"] = service_acct_file

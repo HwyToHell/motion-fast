@@ -2,6 +2,8 @@
   pyrebase
   watchdog
 - settings changed in scripts
+  firebaseconfig.py
+    "serviceAccount": "/home/pi/firebase/serviceAccountKey.json"
   upload-videos.py:
     path_to_monitor = "/home/pi"
     sys.path.append("/home/pi/firebase") # path to credentials

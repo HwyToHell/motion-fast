@@ -31,5 +31,5 @@ cp $logfilePath $logStampedPath
 > $logfilePath
 
 
-echo "Log saved to: $logStampedPath"
+echo $(date +'%Y-%m-%d %H:%M:%S') "Log saved to: $logStampedPath"
 

@@ -1,10 +1,22 @@
 #!/usr/bin/python3
 # with this shebang the script name shows up in process list,
 # if run from command line as ./upload-videos.py
+# 
+# usage: remove-old-remote-videos.py <path-to-credentials>
  
-import sys
+import os, sys
 import pyrebase
 from datetime import datetime, timedelta
+
+
+if len(sys.argv) < 2:
+    print(f"usage: {sys.argv[0]} <path-to-credentials>")
+    sys.exit(-1)
+
+path_to_credentials = sys.argv[1]
+if not os.path.isdir(path_to_credentials):
+    print(f"path-to-credentials: '{path_to_credentials}' is not a directory")   
+    sys.exit(-2)
 
 
 def time_stamp():
@@ -46,8 +58,10 @@ print(f"{time_stamp()} Removing files prior to {discard_date_prior}")
 
 
 ### enable serves for firebase storage 
-sys.path.append("/home/pi/firebase") # path to credentials
+sys.path.append(path_to_credentials)
+service_acct_file = path_to_credentials + "/serviceAccountKey.json"
 from firebaseconfig import config
+config["serviceAccount"] = service_acct_file
 firebase = pyrebase.initialize_app(config)
 try:
     storage = firebase.storage()
