@@ -18,3 +18,5 @@
   firebaseconfig.py
   serviceAccountKey.json
   
+
+2021-11-28 pass directories as args
