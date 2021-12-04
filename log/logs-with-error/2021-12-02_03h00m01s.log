@@ -1,0 +1,32 @@
+2021-12-01 03:00:01 Log saved to: /home/pi/2021-12-01_03h00m01s.log
+2021-12-01 03:00:01 Restart motion and firebase uploader
+2021-12-01 03:00:01 No 'motion' instance running, start new one
+Traceback (most recent call last):
+  File "/home/pi/bin/dvrip.py", line 115, in connect
+    self.socket.connect((self.ip, self.port))
+TimeoutError: [Errno 110] Connection timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/pi/bin/set-cam-time.py", line 8, in <module>
+    if cam.login():
+  File "/home/pi/bin/dvrip.py", line 228, in login
+    self.connect()
+  File "/home/pi/bin/dvrip.py", line 127, in connect
+    raise SomethingIsWrongWithCamera('Cannot connect to camera')
+dvrip.SomethingIsWrongWithCamera: Cannot connect to camera
+Path to clean from old video files: /home/pi
+[tcp @ 0x1aae9d0] Connection to tcp://192.168.1.10:554?timeout=5000000 failed: Die Wartezeit für die Verbindung ist abgelaufen
+Failed to open input: Die Wartezeit für die Verbindung ist abgelaufen
+  (../../motion-fast/avreadwrite.cpp:243)
+2021-12-01 03:02:19.13 Error opening input: rtsp://admin:@192.168.1.10
+2021-12-01 03:02:23 SIGUSR1 to 'upload-videos' process (PID 20693) sent, wait for finish
+2021-12-01 03:02:23 SIGUSR1 received, terminate 'upload-videos.py'
+2021-12-01 03:02:23 Files left for upload: 0
+
+2021-12-01 03:02:27 Instance of 'upload-videos' has finished, restart
+2021-12-01 03:02:28 Script 'upload-videos.py' started, send SIGUSR1 to PID 27065 to terminate
+2021-12-01 03:02:28 Monitoring directory /home/pi for new video files
+2021-12-01 03:02:28 Removing files prior to 2021-11-26 00:00:00
+2021-12-01 03:02:34 All files removed

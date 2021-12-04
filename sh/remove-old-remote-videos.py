@@ -54,7 +54,7 @@ def get_files_to_remove(file_list, days_in_history):
 ### remove all video files older than discard_days_prior
 discard_days_prior = 5
 discard_date_prior = date_today_midnight() - timedelta(days=discard_days_prior)
-print(f"{time_stamp()} Removing files prior to {discard_date_prior}")
+print(f"{time_stamp()} Removing files prior to {discard_date_prior} from firebase storage")
 
 
 ### enable serves for firebase storage 
@@ -90,3 +90,4 @@ if len(backlog_remove) == 0:
     print(f"{time_stamp()} All files removed")
 else:
     print(f"{time_stamp()} Error, was not able to remove these files:\n {backlog_remove}")
+    
