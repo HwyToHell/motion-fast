@@ -641,26 +641,22 @@ int main(int argc, char *argv[])
                 // keep trying to connect
                 // 2021-11-11 also for invalid data (for test purposes)
                 if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH) || ret == AVERROR_INVALIDDATA) {
-                    int remainingSeconds = 15;
-                    while (remainingSeconds) {
-                        std::cout << getTimeStampMs() << "Connection timed out, trying to re-connect in"
-                                  << std::setw(3) << --remainingSeconds << " sec" << "\r";
-                        std::cout.flush();
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                    }
-                    std::cout << "Re-connecting ...                                      " << std::endl;
+                    int timeout = 30;
+                    std::cout << getTimeStampMs() << " Open input error (" << ret
+                              << "), trying to re-connect in" << timeout << " sec" << std::endl;
+                    std::this_thread::sleep_for(std::chrono::seconds(timeout));
                     continue;
                 // terminate application for any other error
                 } else if (ret < 0) {
-                    std::cout << getTimeStampMs() << " Failed to open input: "  << inputStream << std::endl;
+                    std::cout << getTimeStampMs() << " Serious error (" << ret << "), break" << std::endl;
                     terminateThreads(decodeQueue, preCaptureBuffer, appState);
                     return -1;
                 }
             }
-            std::cout << getTimeStampMs() << "Video input opened successfully: "
+            std::cout << getTimeStampMs() << " Video input opened successfully: "
                       << inputStream << std::endl;
             if (!reader.getVideoStreamInfo(appState.streamInfo)) {
-                std::cout << getTimeStampMs() << "Failed to get video stream info"
+                std::cout << getTimeStampMs() << " Failed to get video stream info"
                           << std::endl;
                 terminateThreads(decodeQueue, preCaptureBuffer, appState);
                 return -1;
