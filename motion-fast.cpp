@@ -673,13 +673,19 @@ int main(int argc, char *argv[])
         appState.motion.startCnd.notify_one(); // notifies waitForMotion in order to get resetDone notification
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waiting for resetDone");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waiting for resetDone" << std::endl;
         std::unique_lock<std::mutex> lockReset(appState.resetDoneMtx);
         appState.resetDoneCnd.wait(lockReset, [&]{return(appState.resetDone);});
         appState.resetDone = false;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", resetDone triggered");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", resetDone triggered" << std::endl;
 
         reader.close();
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reader closed");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reader closed" << std::endl;
 
         // TODO inc failcount, measure fail time
         std::cout << "Reading errors: " << ++appState.errorCount << ", seconds since last error: "
