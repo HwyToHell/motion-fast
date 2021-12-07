@@ -274,7 +274,7 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
     bool succ = true;
     AVPacket* packetDecoder = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    std::cout << getTimeStampMs() << " Send SIGUSR1 to PID " << getpid() << " to terminate video processing" << std::endl;
+    std::cout << getTimeStampMs() << " Send SIGUSR1 to PID " << getpid() << " to terminate 'motion'" << std::endl;
 
     //reader.playStream();
     // int packetsRead = 0;
@@ -313,7 +313,7 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
         // SIGUSR1 received
         if (g_terminate) {
             std::cout << std::endl << getTimeStampMs()
-                      << " SIGUSR1 received, terminating video processing" << std::endl;
+                      << " SIGUSR1 received, terminating 'motion'" << std::endl;
             appState.terminate = true;
             return false;
         }
@@ -354,7 +354,7 @@ long long secondsWithoutError(State& appState)
 void sigHandler(int signum)
 {
     if (signum == SIGUSR1) {
-        std::cout << "SIGUSR1 received" << std::endl;
+        //std::cout << "SIGUSR1 received" << std::endl;
         g_terminate = 1;
     }
 }
@@ -640,17 +640,14 @@ int main(int argc, char *argv[])
 
                 // keep trying to connect
                 // 2021-11-11 also for invalid data (for test purposes)
-                if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH) || ret == AVERROR_INVALIDDATA) {
+                // if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH) || ret == AVERROR_INVALIDDATA) {
+                // keep trying to connect for all errors
+                if (ret < 0) {
                     int timeout = 30;
                     std::cout << getTimeStampMs() << " Open input error (" << ret
                               << "), trying to re-connect in" << timeout << " sec" << std::endl;
                     std::this_thread::sleep_for(std::chrono::seconds(timeout));
                     continue;
-                // terminate application for any other error
-                } else if (ret < 0) {
-                    std::cout << getTimeStampMs() << " Serious error (" << ret << "), break" << std::endl;
-                    terminateThreads(decodeQueue, preCaptureBuffer, appState);
-                    return -1;
                 }
             }
             std::cout << getTimeStampMs() << " Video input opened successfully: "
@@ -687,9 +684,12 @@ int main(int argc, char *argv[])
         // DEBUG TODO DELETE
         std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reader closed" << std::endl;
 
-        // TODO inc failcount, measure fail time
-        std::cout << "Reading errors: " << ++appState.errorCount << ", seconds since last error: "
-                  << secondsWithoutError(appState) << std::endl;
+        std::cout << getTimeStampMs() << " Reading errors: " << ++appState.errorCount
+                  << ", seconds since last error: " << secondsWithoutError(appState) << std::endl;
+        int timeoutReset = 30;
+        std::cout << getTimeStampMs() << " Buffers have been reset, trying to re-connect in "
+                  << timeoutReset << " sec" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(timeoutReset));
     }
 
     terminateThreads(decodeQueue, preCaptureBuffer, appState);
