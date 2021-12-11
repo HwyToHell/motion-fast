@@ -36,7 +36,7 @@ then
     echo $(date +'%Y-%m-%d %H:%M:%S') "SIGUSR1 to 'upload-videos' process (PID $upload_pid) sent, wait for finish"
     kill -s SIGUSR1 $upload_pid
     tail --pid=$upload_pid -f /dev/null
-    sleep 3
+    sleep 10
 	echo $(date +'%Y-%m-%d %H:%M:%S') "Instance of 'upload-videos' has finished, restart"
 else
 	echo $(date +'%Y-%m-%d %H:%M:%S') "No 'upload-videos' instance running, start new one"

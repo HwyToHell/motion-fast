@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # with this shebang the script name shows up in process list,
 # if run from command line as ./upload-videos.py
+# 
+# usage: upload-videos.py <path_to_monitor> <path-to-credentials>
 
 import os, signal, sys, time
 from threading import Event
@@ -11,7 +13,22 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 
-path_to_monitor = "/home/pi"
+if len(sys.argv) < 3:
+    print(f"usage: {sys.argv[0]} <path-to-monitor> <path-to-credentials>")
+    sys.exit(-1) 
+
+path_to_monitor = sys.argv[1]
+path_to_credentials = sys.argv[2]
+exit = False
+if not os.path.isdir(path_to_monitor):
+    print(f"path-to-monitor: '{path_to_monitor}' is not a directory")   
+    exit = True
+if not os.path.isdir(path_to_credentials):
+    print(f"path-to-credentials: '{path_to_credentials}' is not a directory")   
+    exit = True
+if exit:
+    sys.exit(-2)
+
 upload_list = []
 
 
@@ -22,10 +39,10 @@ def time_stamp():
 #### handler for terminating app with SIGUSR1
 terminate = Event()
 def signalHandler(sig, frame):
-    print(f"{time_stamp()} SIGUSR1 received, terminate upload-videos.py", flush=True)
+    print(f"{time_stamp()} SIGUSR1 received, terminate 'upload-videos.py'", flush=True)
     terminate.set()
 signal.signal(signal.SIGUSR1, signalHandler)
-print(f"{time_stamp()} Send SIGUSR1 to PID {os.getpid()} to terminate", flush=True)
+print(f"{time_stamp()} Script 'upload-videos.py' started, send SIGUSR1 to PID {os.getpid()} to terminate", flush=True)
 
 
 #### watchdog for new video files in {path}
@@ -83,13 +100,14 @@ def upload_closed_file(storage, full_path_name):
             #print(ret)
             print(f"{time_stamp()} Upload successful: {file_name}", flush=True)
             attempts_left = 0
+            timeout = 1
             return True
         # ConnectionError
         except requests.exceptions.RequestException as err:  
             print(type(err).__name__, flush=True)
             print(f"{time_stamp()} Waiting for {timeout} sec to reconnect", flush=True)
             time.sleep(timeout)
-            timeout *= 2
+            timeout = timeout * 2 if timeout < 60 else 60
 
     print(f"{time_stamp()} Was not able to connect", flush=True)
     return False
@@ -116,8 +134,10 @@ def print_upload_list():
 
 
 # enable service for firebase storage
-sys.path.append("/home/pi/firebase") # path to credentials
+sys.path.append(path_to_credentials)
+service_acct_file = path_to_credentials + "/serviceAccountKey.json"
 from firebaseconfig import config
+config["serviceAccount"] = service_acct_file
 firebase = pyrebase.initialize_app(config)
 
 # trying to reconnect with max timeout of 60 sec
@@ -126,15 +146,18 @@ while not terminate.is_set():
     try:
         storage = firebase.storage() 
 
-        # upload loop - repeat every 60 sec until terminated by SIGUSR1
+        # upload loop - repeat every 10 sec until terminated by SIGUSR1
         while not terminate.is_set():
             process_upload_list(storage)
             terminate.wait(10)
+
+        timeout = 1
 
     except BaseException as e:
         timeout = timeout * 2 if timeout < 60 else 60
         print(f"{time_stamp()} Firebase storage not reachable: {type(e).__name__}", flush=True)
         print(f" trying to reconnect in {timeout} sec", flush=True)
+    
     terminate.wait(timeout)
 
 
