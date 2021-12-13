@@ -103,9 +103,10 @@ def upload_closed_file(storage, full_path_name):
             timeout = 1
             return True
         # ConnectionError
-        except requests.exceptions.RequestException as err:  
-            print(type(err).__name__, flush=True)
-            print(f"{time_stamp()} Waiting for {timeout} sec to reconnect", flush=True)
+        #except requests.exceptions.RequestException as err:
+        except BaseException as err:  
+            print(f"{time_stamp()} Upload error: {type(err).__name__}", flush=True)
+            print(f" trying to reconnect in {timeout} sec", flush=True)
             time.sleep(timeout)
             timeout = timeout * 2 if timeout < 60 else 60
 
@@ -145,20 +146,17 @@ timeout = 1
 while not terminate.is_set():
     try:
         storage = firebase.storage() 
-
+        timeout = 1
         # upload loop - repeat every 10 sec until terminated by SIGUSR1
         while not terminate.is_set():
             process_upload_list(storage)
             terminate.wait(10)
 
-        timeout = 1
-
     except BaseException as e:
-        timeout = timeout * 2 if timeout < 60 else 60
         print(f"{time_stamp()} Firebase storage not reachable: {type(e).__name__}", flush=True)
         print(f" trying to reconnect in {timeout} sec", flush=True)
-    
-    terminate.wait(timeout)
+        terminate.wait(timeout)
+        timeout = timeout * 2 if timeout < 60 else 60
 
 
 

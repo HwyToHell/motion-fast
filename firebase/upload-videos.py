@@ -145,13 +145,11 @@ timeout = 1
 while not terminate.is_set():
     try:
         storage = firebase.storage() 
-
+        timeout = 1
         # upload loop - repeat every 10 sec until terminated by SIGUSR1
         while not terminate.is_set():
             process_upload_list(storage)
             terminate.wait(10)
-
-        timeout = 1
 
     except BaseException as e:
         timeout = timeout * 2 if timeout < 60 else 60

@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
                 if (ret < 0) {
                     int timeout = 30;
                     std::cout << getTimeStampMs() << " Open input error (" << ret
-                              << "), trying to re-connect in" << timeout << " sec" << std::endl;
+                              << "), trying to re-connect in " << timeout << " sec" << std::endl;
                     std::this_thread::sleep_for(std::chrono::seconds(timeout));
                     continue;
                 }
