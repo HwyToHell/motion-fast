@@ -120,12 +120,14 @@ def process_upload_list(store):
         if terminate.is_set():
             break
         else:
-            file_name = file['name']
-            if upload_closed_file(store, file_name):
-                # print("delete from upload_list:", file_name)
-                upload_list.remove(file)
-            else:
-                print(f"{time_stamp()} Upload not successful", flush=True)
+            # files must be closed, otherwise partial files might be uploaded
+            if file['is_closed']: 
+                file_name = file['name']
+                if upload_closed_file(store, file_name):
+                    # print("delete from upload_list:", file_name)
+                    upload_list.remove(file)
+                else:
+                    print(f"{time_stamp()} Upload not successful", flush=True)
 
 
 def print_upload_list():

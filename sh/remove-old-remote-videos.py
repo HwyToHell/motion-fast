@@ -52,7 +52,7 @@ def get_files_to_remove(file_list, days_in_history):
 
 
 ### remove all video files older than discard_days_prior
-discard_days_prior = 5
+discard_days_prior = 6
 discard_date_prior = date_today_midnight() - timedelta(days=discard_days_prior)
 print(f"{time_stamp()} Removing files prior to {discard_date_prior} from firebase storage")
 
