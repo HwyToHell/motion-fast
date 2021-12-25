@@ -45,6 +45,6 @@ fi
 # start upload-videos as background process
 $path_bin/upload-videos.py $path_monitor $path_credentials &
 
-# delete video files older than 6 days from server
+# delete video files older than 5 days from server
 $path_bin/remove-old-remote-videos.py $path_credentials
 
