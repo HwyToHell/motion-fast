@@ -3,15 +3,15 @@ TARGET = motion
 CONFIG += console
 CONFIG += c++17
 CONFIG -= app_bundle
-CONFIG -= qt
+#CONFIG -= qt
+QT += core #gui widgets needed for QApplication
 
 
 DEFINES -= DEBUG_BUILD
 
 SOURCES += \
+    avreadwrite.cpp \
     backgroundsubtraction.cpp \
-    decode-buffer.cpp \
-    libavreadwrite.cpp \
     motion-detector.cpp \
     motion-fast.cpp \
     test/avreadwrite-test.cpp \
@@ -42,9 +42,9 @@ contains(QT_ARCH, "arm") {
 
 
 HEADERS += \
+    avreadwrite.h \
     backgroundsubtraction.h \
     circularbuffer.h \
-    libavreadwrite.h \
     motion-detector.h \
     perfcounter.h \
     safebuffer.h \

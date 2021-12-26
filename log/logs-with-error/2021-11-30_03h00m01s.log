@@ -1,0 +1,913 @@
+2021-11-29 03:00:02 Log saved to: /home/pi/2021-11-29_03h00m02s.log
+2021-11-29 03:00:02 Restart motion and firebase uploader
+2021-11-29 03:00:02 SIGUSR1 to 'motion' process (PID 9367) sent, wait for finish
+SIGUSR1 received
+
+2021-11-29 03:00:02.87 SIGUSR1 received, terminating video processing
+[22;31m2021-11-29 03:00:02.87 Terminate application
+[0m2021-11-29 03:00:02.87 Waiting for worker threads to join
+2021-11-29 03:00:02.116 Motion detection thread joined
+2021-11-29 03:00:02.116 Write packets thread joined
+2021-11-29 03:00:03 Instance of 'motion' has finished, restart
+Device manager connected to 192.168.1.10
+Camera time set to: 2021-11-29 03:00:03
+Device manager disconnected
+Path to clean from old video files: /home/pi
+2021-11-29 03:00:06.86 Open video input: rtsp://admin:@192.168.1.10
+2021-11-29 03:00:07.87 Send SIGUSR1 to PID 13056 to terminate video processing
+2021-11-29 03:00:08.607 Queue of size: 34 discharged at 3.96149 sec
+2021-11-29 03:00:11 SIGUSR1 to 'upload-videos' process (PID 10688) sent, wait for finish
+2021-11-29 03:00:11 SIGUSR1 received, terminate 'upload-videos.py'
+2021-11-29 03:00:12 Files left for upload: 0
+
+2021-11-29 03:00:16 Instance of 'upload-videos' has finished, restart
+2021-11-29 03:00:17 Script 'upload-videos.py' started, send SIGUSR1 to PID 14413 to terminate
+2021-11-29 03:00:17 Monitoring directory /home/pi for new video files
+2021-11-29 03:00:17 Removing files prior to 2021-11-24 00:00:00
+2021-11-29 03:00:18 All files removed
+2021-11-29 04:20:53.416 START MOTION ---------
+2021-11-29 04:20:53 Video file /home/pi/2021-11-29_04h20m53s.mp4 queued for uploading
+2021-11-29 04:20:58 Trying to upload: 2021-11-29_04h20m53s.mp4
+2021-11-29 04:21:07.488 STOP MOTION ----------
+2021-11-29 04:21:10 Upload successful: 2021-11-29_04h20m53s.mp4
+2021-11-29 05:39:57.149 START MOTION ---------
+2021-11-29 05:39:57 Video file /home/pi/2021-11-29_05h39m57s.mp4 queued for uploading
+2021-11-29 05:40:00 Trying to upload: 2021-11-29_05h39m57s.mp4
+2021-11-29 05:40:01.973 STOP MOTION ----------
+2021-11-29 05:40:08 Upload successful: 2021-11-29_05h39m57s.mp4
+2021-11-29 05:59:50.409 START MOTION ---------
+2021-11-29 05:59:50 Video file /home/pi/2021-11-29_05h59m50s.mp4 queued for uploading
+2021-11-29 05:59:58 Trying to upload: 2021-11-29_05h59m50s.mp4
+2021-11-29 05:59:59.48 STOP MOTION ----------
+2021-11-29 06:00:08 Upload successful: 2021-11-29_05h59m50s.mp4
+2021-11-29 06:33:08.745 START MOTION ---------
+2021-11-29 06:33:08 Video file /home/pi/2021-11-29_06h33m08s.mp4 queued for uploading
+2021-11-29 06:33:08 Trying to upload: 2021-11-29_06h33m08s.mp4
+2021-11-29 06:33:13 Upload successful: 2021-11-29_06h33m08s.mp4
+2021-11-29 06:33:22.123 STOP MOTION ----------
+2021-11-29 06:34:08.738 START MOTION ---------
+2021-11-29 06:34:08 Video file /home/pi/2021-11-29_06h34m08s.mp4 queued for uploading
+2021-11-29 06:34:13 Trying to upload: 2021-11-29_06h34m08s.mp4
+2021-11-29 06:34:15 Upload successful: 2021-11-29_06h34m08s.mp4
+2021-11-29 06:35:03.526 STOP MOTION ----------
+2021-11-29 06:57:42.324 START MOTION ---------
+2021-11-29 06:57:42 Video file /home/pi/2021-11-29_06h57m42s.mp4 queued for uploading
+2021-11-29 06:57:45 Trying to upload: 2021-11-29_06h57m42s.mp4
+2021-11-29 06:57:53 Upload successful: 2021-11-29_06h57m42s.mp4
+2021-11-29 06:58:16.209 STOP MOTION ----------
+2021-11-29 06:58:19.907 START MOTION ---------
+no key frame found -> close output file
+2021-11-29 06:58:19 Video file /home/pi/2021-11-29_06h58m19s.mp4 queued for uploading
+2021-11-29 06:58:23 Trying to upload: 2021-11-29_06h58m19s.mp4
+2021-11-29 06:58:26 Upload successful: 2021-11-29_06h58m19s.mp4
+2021-11-29 06:58:46.513 STOP MOTION ----------
+2021-11-29 07:08:23.798 START MOTION ---------
+2021-11-29 07:08:23 Video file /home/pi/2021-11-29_07h08m23s.mp4 queued for uploading
+2021-11-29 07:08:26 Trying to upload: 2021-11-29_07h08m23s.mp4
+2021-11-29 07:08:32 Upload successful: 2021-11-29_07h08m23s.mp4
+2021-11-29 07:08:46.993 STOP MOTION ----------
+2021-11-29 07:16:33.979 START MOTION ---------
+2021-11-29 07:16:33 Video file /home/pi/2021-11-29_07h16m33s.mp4 queued for uploading
+2021-11-29 07:16:41.639 STOP MOTION ----------
+2021-11-29 07:16:42 Trying to upload: 2021-11-29_07h16m33s.mp4
+2021-11-29 07:16:56 Upload successful: 2021-11-29_07h16m33s.mp4
+2021-11-29 07:24:19.254 START MOTION ---------
+2021-11-29 07:24:19 Video file /home/pi/2021-11-29_07h24m19s.mp4 queued for uploading
+2021-11-29 07:24:22.693 STOP MOTION ----------
+2021-11-29 07:24:26 Trying to upload: 2021-11-29_07h24m19s.mp4
+2021-11-29 07:24:36.211 START MOTION ---------
+2021-11-29 07:24:36 Video file /home/pi/2021-11-29_07h24m36s.mp4 queued for uploading
+2021-11-29 07:24:36 Upload successful: 2021-11-29_07h24m19s.mp4
+2021-11-29 07:24:44.688 STOP MOTION ----------
+2021-11-29 07:24:46 Trying to upload: 2021-11-29_07h24m36s.mp4
+2021-11-29 07:24:55 Upload successful: 2021-11-29_07h24m36s.mp4
+2021-11-29 07:27:58.511 START MOTION ---------
+2021-11-29 07:27:58 Video file /home/pi/2021-11-29_07h27m58s.mp4 queued for uploading
+2021-11-29 07:28:05 Trying to upload: 2021-11-29_07h27m58s.mp4
+2021-11-29 07:28:06.181 STOP MOTION ----------
+2021-11-29 07:28:08.669 START MOTION ---------
+no key frame found -> close output file
+2021-11-29 07:28:08 Video file /home/pi/2021-11-29_07h28m08s.mp4 queued for uploading
+2021-11-29 07:28:12.125 STOP MOTION ----------
+2021-11-29 07:28:12 Upload successful: 2021-11-29_07h27m58s.mp4
+2021-11-29 07:28:22 Trying to upload: 2021-11-29_07h28m08s.mp4
+2021-11-29 07:28:25 Upload successful: 2021-11-29_07h28m08s.mp4
+2021-11-29 07:28:54.839 START MOTION ---------
+2021-11-29 07:28:54 Video file /home/pi/2021-11-29_07h28m54s.mp4 queued for uploading
+2021-11-29 07:28:55 Trying to upload: 2021-11-29_07h28m54s.mp4
+2021-11-29 07:29:00 Upload successful: 2021-11-29_07h28m54s.mp4
+2021-11-29 07:29:01.914 STOP MOTION ----------
+2021-11-29 07:32:36.792 START MOTION ---------
+2021-11-29 07:32:36 Video file /home/pi/2021-11-29_07h32m36s.mp4 queued for uploading
+2021-11-29 07:32:40 Trying to upload: 2021-11-29_07h32m36s.mp4
+2021-11-29 07:32:42.310 STOP MOTION ----------
+2021-11-29 07:32:46 Upload successful: 2021-11-29_07h32m36s.mp4
+2021-11-29 07:36:03.245 START MOTION ---------
+2021-11-29 07:36:03 Video file /home/pi/2021-11-29_07h36m03s.mp4 queued for uploading
+2021-11-29 07:36:06 Trying to upload: 2021-11-29_07h36m03s.mp4
+2021-11-29 07:36:09.160 STOP MOTION ----------
+2021-11-29 07:36:13 Upload successful: 2021-11-29_07h36m03s.mp4
+2021-11-29 07:46:06.705 START MOTION ---------
+2021-11-29 07:46:06 Video file /home/pi/2021-11-29_07h46m06s.mp4 queued for uploading
+2021-11-29 07:46:13 Trying to upload: 2021-11-29_07h46m06s.mp4
+2021-11-29 07:46:15.438 STOP MOTION ----------
+2021-11-29 07:46:25 Upload successful: 2021-11-29_07h46m06s.mp4
+2021-11-29 07:48:40.68 START MOTION ---------
+2021-11-29 07:48:40 Video file /home/pi/2021-11-29_07h48m40s.mp4 queued for uploading
+2021-11-29 07:48:45 Trying to upload: 2021-11-29_07h48m40s.mp4
+2021-11-29 07:48:56 Upload successful: 2021-11-29_07h48m40s.mp4
+2021-11-29 07:49:02.957 STOP MOTION ----------
+2021-11-29 08:04:36.857 START MOTION ---------
+2021-11-29 08:04:36 Video file /home/pi/2021-11-29_08h04m36s.mp4 queued for uploading
+2021-11-29 08:04:41.495 STOP MOTION ----------
+2021-11-29 08:04:46 Trying to upload: 2021-11-29_08h04m36s.mp4
+2021-11-29 08:05:10 Upload successful: 2021-11-29_08h04m36s.mp4
+2021-11-29 08:11:17.679 START MOTION ---------
+2021-11-29 08:11:17 Video file /home/pi/2021-11-29_08h11m17s.mp4 queued for uploading
+2021-11-29 08:11:20 Trying to upload: 2021-11-29_08h11m17s.mp4
+2021-11-29 08:11:22.595 STOP MOTION ----------
+2021-11-29 08:11:30 Upload successful: 2021-11-29_08h11m17s.mp4
+2021-11-29 09:00:57.295 START MOTION ---------
+2021-11-29 09:00:57 Video file /home/pi/2021-11-29_09h00m57s.mp4 queued for uploading
+2021-11-29 09:01:00 Trying to upload: 2021-11-29_09h00m57s.mp4
+2021-11-29 09:01:06.262 STOP MOTION ----------
+2021-11-29 09:01:10 Upload successful: 2021-11-29_09h00m57s.mp4
+2021-11-29 09:07:44.371 START MOTION ---------
+2021-11-29 09:07:44 Video file /home/pi/2021-11-29_09h07m44s.mp4 queued for uploading
+2021-11-29 09:07:48.364 STOP MOTION ----------
+2021-11-29 09:07:50 Trying to upload: 2021-11-29_09h07m44s.mp4
+2021-11-29 09:08:13 Upload successful: 2021-11-29_09h07m44s.mp4
+2021-11-29 09:10:49.472 START MOTION ---------
+2021-11-29 09:10:49 Video file /home/pi/2021-11-29_09h10m49s.mp4 queued for uploading
+2021-11-29 09:10:53 Trying to upload: 2021-11-29_09h10m49s.mp4
+2021-11-29 09:10:57.135 STOP MOTION ----------
+2021-11-29 09:11:02 Upload successful: 2021-11-29_09h10m49s.mp4
+2021-11-29 09:12:05.967 START MOTION ---------
+2021-11-29 09:12:05 Video file /home/pi/2021-11-29_09h12m05s.mp4 queued for uploading
+2021-11-29 09:12:11.194 STOP MOTION ----------
+2021-11-29 09:12:13 Trying to upload: 2021-11-29_09h12m05s.mp4
+2021-11-29 09:12:24 Upload successful: 2021-11-29_09h12m05s.mp4
+2021-11-29 09:28:42.51 START MOTION ---------
+2021-11-29 09:28:42 Video file /home/pi/2021-11-29_09h28m42s.mp4 queued for uploading
+2021-11-29 09:28:44 Trying to upload: 2021-11-29_09h28m42s.mp4
+2021-11-29 09:28:46.618 STOP MOTION ----------
+2021-11-29 09:28:55 Upload successful: 2021-11-29_09h28m42s.mp4
+2021-11-29 09:29:26.612 START MOTION ---------
+2021-11-29 09:29:26 Video file /home/pi/2021-11-29_09h29m26s.mp4 queued for uploading
+2021-11-29 09:29:28.809 STOP MOTION ----------
+2021-11-29 09:29:35 Trying to upload: 2021-11-29_09h29m26s.mp4
+2021-11-29 09:29:42 Upload successful: 2021-11-29_09h29m26s.mp4
+2021-11-29 09:31:18.114 START MOTION ---------
+2021-11-29 09:31:18 Video file /home/pi/2021-11-29_09h31m18s.mp4 queued for uploading
+2021-11-29 09:31:22 Trying to upload: 2021-11-29_09h31m18s.mp4
+2021-11-29 09:31:30 Upload successful: 2021-11-29_09h31m18s.mp4
+2021-11-29 09:31:44.3 STOP MOTION ----------
+2021-11-29 09:32:17.825 START MOTION ---------
+2021-11-29 09:32:17 Video file /home/pi/2021-11-29_09h32m17s.mp4 queued for uploading
+2021-11-29 09:32:19.825 STOP MOTION ----------
+2021-11-29 09:32:20 Trying to upload: 2021-11-29_09h32m17s.mp4
+2021-11-29 09:32:28 Upload successful: 2021-11-29_09h32m17s.mp4
+2021-11-29 09:32:42.143 START MOTION ---------
+2021-11-29 09:32:42 Video file /home/pi/2021-11-29_09h32m42s.mp4 queued for uploading
+2021-11-29 09:32:48 Trying to upload: 2021-11-29_09h32m42s.mp4
+2021-11-29 09:32:55.899 STOP MOTION ----------
+2021-11-29 09:33:00.139 START MOTION ---------
+2021-11-29 09:33:00 Video file /home/pi/2021-11-29_09h33m00s.mp4 queued for uploading
+2021-11-29 09:33:01 Upload successful: 2021-11-29_09h32m42s.mp4
+2021-11-29 09:33:11 Trying to upload: 2021-11-29_09h33m00s.mp4
+2021-11-29 09:33:17.648 STOP MOTION ----------
+2021-11-29 09:33:23.239 START MOTION ---------
+2021-11-29 09:33:23 Video file /home/pi/2021-11-29_09h33m23s.mp4 queued for uploading
+2021-11-29 09:33:27 Upload successful: 2021-11-29_09h33m00s.mp4
+2021-11-29 09:33:37 Trying to upload: 2021-11-29_09h33m23s.mp4
+2021-11-29 09:33:49.608 STOP MOTION ----------
+2021-11-29 09:33:58 Firebase storage not reachable: TransferInvalidError
+ trying to reconnect in 2 sec
+2021-11-29 09:34:00 Trying to upload: 2021-11-29_09h33m23s.mp4
+2021-11-29 09:34:36 Upload successful: 2021-11-29_09h33m23s.mp4
+2021-11-29 09:34:50.994 START MOTION ---------
+2021-11-29 09:34:50 Video file /home/pi/2021-11-29_09h34m50s.mp4 queued for uploading
+2021-11-29 09:34:56 Trying to upload: 2021-11-29_09h34m50s.mp4
+2021-11-29 09:35:04.577 STOP MOTION ----------
+2021-11-29 09:35:06 Upload successful: 2021-11-29_09h34m50s.mp4
+2021-11-29 09:35:07.723 START MOTION ---------
+2021-11-29 09:35:07 Video file /home/pi/2021-11-29_09h35m07s.mp4 queued for uploading
+2021-11-29 09:35:16 Trying to upload: 2021-11-29_09h35m07s.mp4
+2021-11-29 09:35:17.593 STOP MOTION ----------
+2021-11-29 09:35:27 Upload successful: 2021-11-29_09h35m07s.mp4
+2021-11-29 09:36:05.79 START MOTION ---------
+2021-11-29 09:36:05 Video file /home/pi/2021-11-29_09h36m05s.mp4 queued for uploading
+2021-11-29 09:36:07 Trying to upload: 2021-11-29_09h36m05s.mp4
+2021-11-29 09:36:14 Upload successful: 2021-11-29_09h36m05s.mp4
+2021-11-29 09:36:20.675 STOP MOTION ----------
+2021-11-29 09:36:32.675 START MOTION ---------
+2021-11-29 09:36:32 Video file /home/pi/2021-11-29_09h36m32s.mp4 queued for uploading
+2021-11-29 09:36:34 Trying to upload: 2021-11-29_09h36m32s.mp4
+2021-11-29 09:36:40 Upload successful: 2021-11-29_09h36m32s.mp4
+2021-11-29 09:36:44.143 STOP MOTION ----------
+2021-11-29 09:37:08.980 START MOTION ---------
+2021-11-29 09:37:08 Video file /home/pi/2021-11-29_09h37m08s.mp4 queued for uploading
+2021-11-29 09:37:10 Trying to upload: 2021-11-29_09h37m08s.mp4
+2021-11-29 09:37:17 Upload successful: 2021-11-29_09h37m08s.mp4
+2021-11-29 09:37:29.40 STOP MOTION ----------
+2021-11-29 09:37:32.58 START MOTION ---------
+2021-11-29 09:37:32 Video file /home/pi/2021-11-29_09h37m32s.mp4 queued for uploading
+2021-11-29 09:37:35.827 STOP MOTION ----------
+2021-11-29 09:37:37 Trying to upload: 2021-11-29_09h37m32s.mp4
+2021-11-29 09:37:44 Upload successful: 2021-11-29_09h37m32s.mp4
+2021-11-29 09:37:53.746 START MOTION ---------
+2021-11-29 09:37:53 Video file /home/pi/2021-11-29_09h37m53s.mp4 queued for uploading
+2021-11-29 09:37:54 Trying to upload: 2021-11-29_09h37m53s.mp4
+2021-11-29 09:38:00 Upload successful: 2021-11-29_09h37m53s.mp4
+2021-11-29 09:38:10.814 STOP MOTION ----------
+2021-11-29 09:50:26.943 START MOTION ---------
+2021-11-29 09:50:26 Video file /home/pi/2021-11-29_09h50m26s.mp4 queued for uploading
+2021-11-29 09:50:31 Trying to upload: 2021-11-29_09h50m26s.mp4
+2021-11-29 09:50:32.10 STOP MOTION ----------
+2021-11-29 09:50:41 Upload successful: 2021-11-29_09h50m26s.mp4
+2021-11-29 10:12:17.873 START MOTION ---------
+2021-11-29 10:12:17 Video file /home/pi/2021-11-29_10h12m17s.mp4 queued for uploading
+2021-11-29 10:12:21 Trying to upload: 2021-11-29_10h12m17s.mp4
+2021-11-29 10:12:22.508 STOP MOTION ----------
+2021-11-29 10:12:42 Upload successful: 2021-11-29_10h12m17s.mp4
+2021-11-29 10:23:54.352 START MOTION ---------
+2021-11-29 10:23:54 Video file /home/pi/2021-11-29_10h23m54s.mp4 queued for uploading
+2021-11-29 10:24:02 Trying to upload: 2021-11-29_10h23m54s.mp4
+2021-11-29 10:24:04.599 STOP MOTION ----------
+2021-11-29 10:24:18 Upload successful: 2021-11-29_10h23m54s.mp4
+2021-11-29 10:32:28.767 START MOTION ---------
+2021-11-29 10:32:28 Video file /home/pi/2021-11-29_10h32m28s.mp4 queued for uploading
+2021-11-29 10:32:32.792 STOP MOTION ----------
+2021-11-29 10:32:38 Trying to upload: 2021-11-29_10h32m28s.mp4
+2021-11-29 10:32:52 Upload successful: 2021-11-29_10h32m28s.mp4
+2021-11-29 10:34:14.405 START MOTION ---------
+2021-11-29 10:34:14 Video file /home/pi/2021-11-29_10h34m14s.mp4 queued for uploading
+2021-11-29 10:34:22 Trying to upload: 2021-11-29_10h34m14s.mp4
+2021-11-29 10:34:25.322 STOP MOTION ----------
+2021-11-29 10:34:35 Upload successful: 2021-11-29_10h34m14s.mp4
+2021-11-29 10:50:51.291 START MOTION ---------
+2021-11-29 10:50:51 Video file /home/pi/2021-11-29_10h50m51s.mp4 queued for uploading
+2021-11-29 10:50:55 Trying to upload: 2021-11-29_10h50m51s.mp4
+2021-11-29 10:51:09 Upload successful: 2021-11-29_10h50m51s.mp4
+2021-11-29 10:51:12.213 STOP MOTION ----------
+2021-11-29 10:51:14.450 START MOTION ---------
+2021-11-29 10:51:14 Video file /home/pi/2021-11-29_10h51m14s.mp4 queued for uploading
+2021-11-29 10:51:19 Trying to upload: 2021-11-29_10h51m14s.mp4
+2021-11-29 10:51:26.320 STOP MOTION ----------
+2021-11-29 10:51:26 Upload successful: 2021-11-29_10h51m14s.mp4
+2021-11-29 10:53:35.506 START MOTION ---------
+2021-11-29 10:53:35 Video file /home/pi/2021-11-29_10h53m35s.mp4 queued for uploading
+2021-11-29 10:53:36 Trying to upload: 2021-11-29_10h53m35s.mp4
+2021-11-29 10:53:39.374 STOP MOTION ----------
+2021-11-29 10:53:41 Upload successful: 2021-11-29_10h53m35s.mp4
+2021-11-29 10:55:31.178 START MOTION ---------
+2021-11-29 10:55:31 Video file /home/pi/2021-11-29_10h55m31s.mp4 queued for uploading
+2021-11-29 10:55:31 Trying to upload: 2021-11-29_10h55m31s.mp4
+2021-11-29 10:55:34.528 STOP MOTION ----------
+2021-11-29 10:55:36 Upload successful: 2021-11-29_10h55m31s.mp4
+2021-11-29 11:08:02.196 START MOTION ---------
+2021-11-29 11:08:02 Video file /home/pi/2021-11-29_11h08m02s.mp4 queued for uploading
+2021-11-29 11:08:06.115 STOP MOTION ----------
+2021-11-29 11:08:06 Trying to upload: 2021-11-29_11h08m02s.mp4
+2021-11-29 11:08:18 Upload successful: 2021-11-29_11h08m02s.mp4
+2021-11-29 11:13:57.55 START MOTION ---------
+2021-11-29 11:13:57 Video file /home/pi/2021-11-29_11h13m57s.mp4 queued for uploading
+2021-11-29 11:13:58 Trying to upload: 2021-11-29_11h13m57s.mp4
+2021-11-29 11:14:02.368 STOP MOTION ----------
+2021-11-29 11:14:12 Upload successful: 2021-11-29_11h13m57s.mp4
+2021-11-29 11:17:19.310 START MOTION ---------
+2021-11-29 11:17:19 Video file /home/pi/2021-11-29_11h17m19s.mp4 queued for uploading
+2021-11-29 11:17:22.443 STOP MOTION ----------
+2021-11-29 11:17:22 Trying to upload: 2021-11-29_11h17m19s.mp4
+2021-11-29 11:17:31 Upload successful: 2021-11-29_11h17m19s.mp4
+2021-11-29 11:18:21.171 START MOTION ---------
+2021-11-29 11:18:21 Video file /home/pi/2021-11-29_11h18m21s.mp4 queued for uploading
+2021-11-29 11:18:21 Trying to upload: 2021-11-29_11h18m21s.mp4
+2021-11-29 11:18:26.778 STOP MOTION ----------
+2021-11-29 11:18:26 Upload successful: 2021-11-29_11h18m21s.mp4
+2021-11-29 11:32:56.819 START MOTION ---------
+2021-11-29 11:32:56 Video file /home/pi/2021-11-29_11h32m56s.mp4 queued for uploading
+2021-11-29 11:32:56 Trying to upload: 2021-11-29_11h32m56s.mp4
+2021-11-29 11:33:00.558 STOP MOTION ----------
+2021-11-29 11:33:02 Upload successful: 2021-11-29_11h32m56s.mp4
+2021-11-29 11:34:10.195 START MOTION ---------
+2021-11-29 11:34:10 Video file /home/pi/2021-11-29_11h34m10s.mp4 queued for uploading
+2021-11-29 11:34:12 Trying to upload: 2021-11-29_11h34m10s.mp4
+2021-11-29 11:34:14.683 STOP MOTION ----------
+2021-11-29 11:34:20 Upload successful: 2021-11-29_11h34m10s.mp4
+2021-11-29 11:59:46.693 START MOTION ---------
+2021-11-29 11:59:46 Video file /home/pi/2021-11-29_11h59m46s.mp4 queued for uploading
+2021-11-29 11:59:49.912 STOP MOTION ----------
+2021-11-29 11:59:50 Trying to upload: 2021-11-29_11h59m46s.mp4
+2021-11-29 12:00:01 Upload successful: 2021-11-29_11h59m46s.mp4
+2021-11-29 12:01:53.918 START MOTION ---------
+2021-11-29 12:01:53 Video file /home/pi/2021-11-29_12h01m53s.mp4 queued for uploading
+2021-11-29 12:01:57.797 STOP MOTION ----------
+2021-11-29 12:02:01 Trying to upload: 2021-11-29_12h01m53s.mp4
+2021-11-29 12:02:11 Upload successful: 2021-11-29_12h01m53s.mp4
+2021-11-29 12:04:26.382 START MOTION ---------
+2021-11-29 12:04:26 Video file /home/pi/2021-11-29_12h04m26s.mp4 queued for uploading
+2021-11-29 12:04:31 Trying to upload: 2021-11-29_12h04m26s.mp4
+2021-11-29 12:04:37.381 STOP MOTION ----------
+2021-11-29 12:04:42 Upload successful: 2021-11-29_12h04m26s.mp4
+2021-11-29 12:09:10.505 START MOTION ---------
+2021-11-29 12:09:10 Video file /home/pi/2021-11-29_12h09m10s.mp4 queued for uploading
+2021-11-29 12:09:12 Trying to upload: 2021-11-29_12h09m10s.mp4
+2021-11-29 12:09:14.818 STOP MOTION ----------
+2021-11-29 12:09:21 Upload successful: 2021-11-29_12h09m10s.mp4
+2021-11-29 12:32:38.198 START MOTION ---------
+2021-11-29 12:32:38 Video file /home/pi/2021-11-29_12h32m38s.mp4 queued for uploading
+2021-11-29 12:32:41 Trying to upload: 2021-11-29_12h32m38s.mp4
+2021-11-29 12:32:50.245 STOP MOTION ----------
+2021-11-29 12:33:02 Upload successful: 2021-11-29_12h32m38s.mp4
+2021-11-29 13:05:26.24 START MOTION ---------
+2021-11-29 13:05:26 Video file /home/pi/2021-11-29_13h05m26s.mp4 queued for uploading
+2021-11-29 13:05:32 Trying to upload: 2021-11-29_13h05m26s.mp4
+2021-11-29 13:05:33.165 STOP MOTION ----------
+2021-11-29 13:05:48 Upload successful: 2021-11-29_13h05m26s.mp4
+2021-11-29 13:11:01.442 START MOTION ---------
+2021-11-29 13:11:01 Video file /home/pi/2021-11-29_13h11m01s.mp4 queued for uploading
+2021-11-29 13:11:08 Trying to upload: 2021-11-29_13h11m01s.mp4
+2021-11-29 13:11:10.52 STOP MOTION ----------
+2021-11-29 13:11:24 Upload successful: 2021-11-29_13h11m01s.mp4
+2021-11-29 13:12:16.125 START MOTION ---------
+2021-11-29 13:12:16 Video file /home/pi/2021-11-29_13h12m16s.mp4 queued for uploading
+2021-11-29 13:12:20.809 STOP MOTION ----------
+2021-11-29 13:12:24 Trying to upload: 2021-11-29_13h12m16s.mp4
+2021-11-29 13:12:39 Upload successful: 2021-11-29_13h12m16s.mp4
+2021-11-29 13:12:53.336 START MOTION ---------
+2021-11-29 13:12:53 Video file /home/pi/2021-11-29_13h12m53s.mp4 queued for uploading
+2021-11-29 13:12:59 Trying to upload: 2021-11-29_13h12m53s.mp4
+2021-11-29 13:12:59.84 STOP MOTION ----------
+2021-11-29 13:13:09 Upload successful: 2021-11-29_13h12m53s.mp4
+2021-11-29 13:17:05.936 START MOTION ---------
+2021-11-29 13:17:05 Video file /home/pi/2021-11-29_13h17m05s.mp4 queued for uploading
+2021-11-29 13:17:09 Trying to upload: 2021-11-29_13h17m05s.mp4
+2021-11-29 13:17:19 Upload successful: 2021-11-29_13h17m05s.mp4
+2021-11-29 13:17:35.724 STOP MOTION ----------
+2021-11-29 13:17:40.739 START MOTION ---------
+2021-11-29 13:17:40 Video file /home/pi/2021-11-29_13h17m40s.mp4 queued for uploading
+2021-11-29 13:17:49 Trying to upload: 2021-11-29_13h17m40s.mp4
+2021-11-29 13:17:53.735 STOP MOTION ----------
+2021-11-29 13:18:02 Upload successful: 2021-11-29_13h17m40s.mp4
+2021-11-29 13:18:03.243 START MOTION ---------
+2021-11-29 13:18:03 Video file /home/pi/2021-11-29_13h18m03s.mp4 queued for uploading
+2021-11-29 13:18:12 Trying to upload: 2021-11-29_13h18m03s.mp4
+2021-11-29 13:18:25 Upload successful: 2021-11-29_13h18m03s.mp4
+2021-11-29 13:18:27.370 STOP MOTION ----------
+2021-11-29 13:19:11.369 START MOTION ---------
+2021-11-29 13:19:11 Video file /home/pi/2021-11-29_13h19m11s.mp4 queued for uploading
+2021-11-29 13:19:15 Trying to upload: 2021-11-29_13h19m11s.mp4
+2021-11-29 13:19:20.991 STOP MOTION ----------
+2021-11-29 13:19:25 Upload successful: 2021-11-29_13h19m11s.mp4
+2021-11-29 13:19:34.951 START MOTION ---------
+2021-11-29 13:19:34 Video file /home/pi/2021-11-29_13h19m34s.mp4 queued for uploading
+2021-11-29 13:19:35 Trying to upload: 2021-11-29_13h19m34s.mp4
+2021-11-29 13:19:39 Upload successful: 2021-11-29_13h19m34s.mp4
+2021-11-29 13:19:42.60 STOP MOTION ----------
+2021-11-29 13:21:34.318 START MOTION ---------
+2021-11-29 13:21:34 Video file /home/pi/2021-11-29_13h21m34s.mp4 queued for uploading
+2021-11-29 13:21:39 Trying to upload: 2021-11-29_13h21m34s.mp4
+2021-11-29 13:21:46.53 STOP MOTION ----------
+2021-11-29 13:21:50 Upload successful: 2021-11-29_13h21m34s.mp4
+2021-11-29 13:26:51.45 START MOTION ---------
+2021-11-29 13:26:51 Video file /home/pi/2021-11-29_13h26m51s.mp4 queued for uploading
+2021-11-29 13:26:53.296 STOP MOTION ----------
+2021-11-29 13:27:00 Trying to upload: 2021-11-29_13h26m51s.mp4
+2021-11-29 13:27:16 Upload successful: 2021-11-29_13h26m51s.mp4
+2021-11-29 13:28:01.916 START MOTION ---------
+2021-11-29 13:28:01 Video file /home/pi/2021-11-29_13h28m01s.mp4 queued for uploading
+2021-11-29 13:28:05.116 STOP MOTION ----------
+2021-11-29 13:28:06 Trying to upload: 2021-11-29_13h28m01s.mp4
+2021-11-29 13:28:14 Upload successful: 2021-11-29_13h28m01s.mp4
+2021-11-29 13:28:19.71 START MOTION ---------
+2021-11-29 13:28:19 Video file /home/pi/2021-11-29_13h28m19s.mp4 queued for uploading
+2021-11-29 13:28:24 Trying to upload: 2021-11-29_13h28m19s.mp4
+2021-11-29 13:28:26.190 STOP MOTION ----------
+2021-11-29 13:28:32.781 START MOTION ---------
+2021-11-29 13:28:32 Video file /home/pi/2021-11-29_13h28m32s.mp4 queued for uploading
+2021-11-29 13:28:33 Upload successful: 2021-11-29_13h28m19s.mp4
+2021-11-29 13:28:43 Trying to upload: 2021-11-29_13h28m32s.mp4
+2021-11-29 13:28:47.23 STOP MOTION ----------
+2021-11-29 13:28:58.202 START MOTION ---------
+2021-11-29 13:28:58 Video file /home/pi/2021-11-29_13h28m58s.mp4 queued for uploading
+2021-11-29 13:29:01 Firebase storage not reachable: TransferInvalidError
+ trying to reconnect in 4 sec
+2021-11-29 13:29:05 Trying to upload: 2021-11-29_13h28m32s.mp4
+2021-11-29 13:29:19.744 STOP MOTION ----------
+2021-11-29 13:29:28 Upload successful: 2021-11-29_13h28m32s.mp4
+2021-11-29 13:29:28 Trying to upload: 2021-11-29_13h28m58s.mp4
+2021-11-29 13:29:57 Upload successful: 2021-11-29_13h28m58s.mp4
+2021-11-29 13:30:46.772 START MOTION ---------
+2021-11-29 13:30:46 Video file /home/pi/2021-11-29_13h30m46s.mp4 queued for uploading
+2021-11-29 13:30:47 Trying to upload: 2021-11-29_13h30m46s.mp4
+2021-11-29 13:30:52 Upload successful: 2021-11-29_13h30m46s.mp4
+2021-11-29 13:31:01.689 STOP MOTION ----------
+2021-11-29 13:35:30.933 START MOTION ---------
+2021-11-29 13:35:30 Video file /home/pi/2021-11-29_13h35m30s.mp4 queued for uploading
+2021-11-29 13:35:32 Trying to upload: 2021-11-29_13h35m30s.mp4
+2021-11-29 13:35:35.187 STOP MOTION ----------
+2021-11-29 13:35:49.191 START MOTION ---------
+2021-11-29 13:35:49 Video file /home/pi/2021-11-29_13h35m49s.mp4 queued for uploading
+2021-11-29 13:35:49 Upload successful: 2021-11-29_13h35m30s.mp4
+2021-11-29 13:35:52.723 STOP MOTION ----------
+2021-11-29 13:35:59 Trying to upload: 2021-11-29_13h35m49s.mp4
+2021-11-29 13:36:03.765 START MOTION ---------
+2021-11-29 13:36:03 Video file /home/pi/2021-11-29_13h36m03s.mp4 queued for uploading
+2021-11-29 13:36:07.640 STOP MOTION ----------
+2021-11-29 13:36:09 Upload successful: 2021-11-29_13h35m49s.mp4
+2021-11-29 13:36:19 Trying to upload: 2021-11-29_13h36m03s.mp4
+2021-11-29 13:36:29 Upload successful: 2021-11-29_13h36m03s.mp4
+2021-11-29 13:37:58.53 START MOTION ---------
+2021-11-29 13:37:58 Video file /home/pi/2021-11-29_13h37m58s.mp4 queued for uploading
+2021-11-29 13:37:59 Trying to upload: 2021-11-29_13h37m58s.mp4
+2021-11-29 13:38:04.21 STOP MOTION ----------
+2021-11-29 13:38:06 Upload successful: 2021-11-29_13h37m58s.mp4
+2021-11-29 13:38:10.862 START MOTION ---------
+2021-11-29 13:38:10 Video file /home/pi/2021-11-29_13h38m10s.mp4 queued for uploading
+2021-11-29 13:38:16 Trying to upload: 2021-11-29_13h38m10s.mp4
+2021-11-29 13:38:19.513 STOP MOTION ----------
+2021-11-29 13:38:26 Upload successful: 2021-11-29_13h38m10s.mp4
+2021-11-29 13:47:36.853 START MOTION ---------
+2021-11-29 13:47:36 Video file /home/pi/2021-11-29_13h47m36s.mp4 queued for uploading
+2021-11-29 13:47:46.108 STOP MOTION ----------
+2021-11-29 13:47:46 Trying to upload: 2021-11-29_13h47m36s.mp4
+2021-11-29 13:48:03 Upload successful: 2021-11-29_13h47m36s.mp4
+2021-11-29 13:50:42.48 START MOTION ---------
+2021-11-29 13:50:42 Video file /home/pi/2021-11-29_13h50m42s.mp4 queued for uploading
+2021-11-29 13:50:43 Trying to upload: 2021-11-29_13h50m42s.mp4
+2021-11-29 13:50:49 Upload successful: 2021-11-29_13h50m42s.mp4
+2021-11-29 13:50:53.543 STOP MOTION ----------
+2021-11-29 13:50:57.942 START MOTION ---------
+2021-11-29 13:50:57 Video file /home/pi/2021-11-29_13h50m57s.mp4 queued for uploading
+2021-11-29 13:50:59 Trying to upload: 2021-11-29_13h50m57s.mp4
+2021-11-29 13:51:04 Upload successful: 2021-11-29_13h50m57s.mp4
+2021-11-29 13:51:24.71 STOP MOTION ----------
+2021-11-29 13:52:11.973 START MOTION ---------
+2021-11-29 13:52:11 Video file /home/pi/2021-11-29_13h52m11s.mp4 queued for uploading
+2021-11-29 13:52:14 Trying to upload: 2021-11-29_13h52m11s.mp4
+2021-11-29 13:52:23 Upload successful: 2021-11-29_13h52m11s.mp4
+2021-11-29 13:52:29.608 STOP MOTION ----------
+2021-11-29 13:59:32.393 START MOTION ---------
+2021-11-29 13:59:32 Video file /home/pi/2021-11-29_13h59m32s.mp4 queued for uploading
+2021-11-29 13:59:33 Trying to upload: 2021-11-29_13h59m32s.mp4
+2021-11-29 13:59:41 Upload successful: 2021-11-29_13h59m32s.mp4
+2021-11-29 13:59:46.781 STOP MOTION ----------
+2021-11-29 14:01:53.797 START MOTION ---------
+2021-11-29 14:01:53 Video file /home/pi/2021-11-29_14h01m53s.mp4 queued for uploading
+2021-11-29 14:01:59.514 STOP MOTION ----------
+2021-11-29 14:02:01 Trying to upload: 2021-11-29_14h01m53s.mp4
+2021-11-29 14:02:22 Upload successful: 2021-11-29_14h01m53s.mp4
+2021-11-29 14:02:25.323 START MOTION ---------
+2021-11-29 14:02:25 Video file /home/pi/2021-11-29_14h02m25s.mp4 queued for uploading
+2021-11-29 14:02:32 Trying to upload: 2021-11-29_14h02m25s.mp4
+2021-11-29 14:02:33.671 STOP MOTION ----------
+2021-11-29 14:02:37.797 START MOTION ---------
+2021-11-29 14:02:37 Video file /home/pi/2021-11-29_14h02m37s.mp4 queued for uploading
+2021-11-29 14:02:44.556 STOP MOTION ----------
+2021-11-29 14:02:45 Upload successful: 2021-11-29_14h02m25s.mp4
+2021-11-29 14:02:55 Trying to upload: 2021-11-29_14h02m37s.mp4
+2021-11-29 14:03:11 Upload successful: 2021-11-29_14h02m37s.mp4
+2021-11-29 14:05:35.516 START MOTION ---------
+2021-11-29 14:05:35 Video file /home/pi/2021-11-29_14h05m35s.mp4 queued for uploading
+2021-11-29 14:05:39.530 STOP MOTION ----------
+2021-11-29 14:05:41 Trying to upload: 2021-11-29_14h05m35s.mp4
+2021-11-29 14:05:54 Upload successful: 2021-11-29_14h05m35s.mp4
+2021-11-29 14:10:09.573 START MOTION ---------
+2021-11-29 14:10:09 Video file /home/pi/2021-11-29_14h10m09s.mp4 queued for uploading
+2021-11-29 14:10:12.730 STOP MOTION ----------
+2021-11-29 14:10:14 Trying to upload: 2021-11-29_14h10m09s.mp4
+2021-11-29 14:10:37 Upload successful: 2021-11-29_14h10m09s.mp4
+2021-11-29 14:16:58.519 START MOTION ---------
+2021-11-29 14:16:58 Video file /home/pi/2021-11-29_14h16m58s.mp4 queued for uploading
+2021-11-29 14:17:07 Trying to upload: 2021-11-29_14h16m58s.mp4
+2021-11-29 14:17:09.862 STOP MOTION ----------
+2021-11-29 14:17:30 Upload successful: 2021-11-29_14h16m58s.mp4
+2021-11-29 14:19:30.533 START MOTION ---------
+2021-11-29 14:19:30 Video file /home/pi/2021-11-29_14h19m30s.mp4 queued for uploading
+2021-11-29 14:19:36.142 STOP MOTION ----------
+2021-11-29 14:19:40 Trying to upload: 2021-11-29_14h19m30s.mp4
+2021-11-29 14:19:48.621 START MOTION ---------
+2021-11-29 14:19:48 Video file /home/pi/2021-11-29_14h19m48s.mp4 queued for uploading
+2021-11-29 14:19:54.295 STOP MOTION ----------
+2021-11-29 14:20:02 Upload successful: 2021-11-29_14h19m30s.mp4
+2021-11-29 14:20:12 Trying to upload: 2021-11-29_14h19m48s.mp4
+2021-11-29 14:20:27 Upload successful: 2021-11-29_14h19m48s.mp4
+2021-11-29 14:23:51.604 START MOTION ---------
+2021-11-29 14:23:51 Video file /home/pi/2021-11-29_14h23m51s.mp4 queued for uploading
+2021-11-29 14:23:57 Trying to upload: 2021-11-29_14h23m51s.mp4
+2021-11-29 14:24:01.334 STOP MOTION ----------
+2021-11-29 14:24:19 Upload successful: 2021-11-29_14h23m51s.mp4
+2021-11-29 14:39:35.388 START MOTION ---------
+2021-11-29 14:39:35 Video file /home/pi/2021-11-29_14h39m35s.mp4 queued for uploading
+2021-11-29 14:39:39 Trying to upload: 2021-11-29_14h39m35s.mp4
+2021-11-29 14:39:42.427 STOP MOTION ----------
+2021-11-29 14:40:12 Upload successful: 2021-11-29_14h39m35s.mp4
+2021-11-29 14:43:50.584 START MOTION ---------
+2021-11-29 14:43:50 Video file /home/pi/2021-11-29_14h43m50s.mp4 queued for uploading
+2021-11-29 14:43:52 Trying to upload: 2021-11-29_14h43m50s.mp4
+2021-11-29 14:44:04 Upload successful: 2021-11-29_14h43m50s.mp4
+2021-11-29 14:44:04.469 STOP MOTION ----------
+2021-11-29 14:47:25.120 START MOTION ---------
+2021-11-29 14:47:25 Video file /home/pi/2021-11-29_14h47m25s.mp4 queued for uploading
+2021-11-29 14:47:32.110 STOP MOTION ----------
+2021-11-29 14:47:34 Trying to upload: 2021-11-29_14h47m25s.mp4
+2021-11-29 14:48:01 Upload successful: 2021-11-29_14h47m25s.mp4
+2021-11-29 14:50:35.519 START MOTION ---------
+2021-11-29 14:50:35 Video file /home/pi/2021-11-29_14h50m35s.mp4 queued for uploading
+2021-11-29 14:50:41 Trying to upload: 2021-11-29_14h50m35s.mp4
+2021-11-29 14:50:46.370 STOP MOTION ----------
+2021-11-29 14:51:05 Upload successful: 2021-11-29_14h50m35s.mp4
+2021-11-29 14:57:25.831 START MOTION ---------
+2021-11-29 14:57:25 Video file /home/pi/2021-11-29_14h57m25s.mp4 queued for uploading
+2021-11-29 14:57:34.898 STOP MOTION ----------
+2021-11-29 14:57:35 Trying to upload: 2021-11-29_14h57m25s.mp4
+2021-11-29 14:58:06.144 START MOTION ---------
+2021-11-29 14:58:06 Video file /home/pi/2021-11-29_14h58m06s.mp4 queued for uploading
+2021-11-29 14:58:07 Upload successful: 2021-11-29_14h57m25s.mp4
+2021-11-29 14:58:17 Trying to upload: 2021-11-29_14h58m06s.mp4
+2021-11-29 14:58:18.912 STOP MOTION ----------
+2021-11-29 14:58:40 Upload successful: 2021-11-29_14h58m06s.mp4
+2021-11-29 14:59:12.385 START MOTION ---------
+2021-11-29 14:59:12 Video file /home/pi/2021-11-29_14h59m12s.mp4 queued for uploading
+2021-11-29 14:59:16.382 STOP MOTION ----------
+2021-11-29 14:59:18.336 START MOTION ---------
+2021-11-29 14:59:18 Video file /home/pi/2021-11-29_14h59m18s.mp4 queued for uploading
+2021-11-29 14:59:20 Trying to upload: 2021-11-29_14h59m12s.mp4
+2021-11-29 14:59:28.462 STOP MOTION ----------
+2021-11-29 14:59:41 Upload successful: 2021-11-29_14h59m12s.mp4
+2021-11-29 14:59:41 Trying to upload: 2021-11-29_14h59m18s.mp4
+2021-11-29 15:00:08 Upload successful: 2021-11-29_14h59m18s.mp4
+2021-11-29 15:07:53.212 START MOTION ---------
+2021-11-29 15:07:53 Video file /home/pi/2021-11-29_15h07m53s.mp4 queued for uploading
+2021-11-29 15:07:58 Trying to upload: 2021-11-29_15h07m53s.mp4
+2021-11-29 15:08:05.50 STOP MOTION ----------
+2021-11-29 15:08:18 Upload successful: 2021-11-29_15h07m53s.mp4
+2021-11-29 15:28:49.204 START MOTION ---------
+2021-11-29 15:28:49 Video file /home/pi/2021-11-29_15h28m49s.mp4 queued for uploading
+2021-11-29 15:28:52.863 STOP MOTION ----------
+2021-11-29 15:28:58 Trying to upload: 2021-11-29_15h28m49s.mp4
+2021-11-29 15:29:17 Upload successful: 2021-11-29_15h28m49s.mp4
+2021-11-29 15:31:23.716 START MOTION ---------
+2021-11-29 15:31:23 Video file /home/pi/2021-11-29_15h31m23s.mp4 queued for uploading
+2021-11-29 15:31:27 Trying to upload: 2021-11-29_15h31m23s.mp4
+2021-11-29 15:31:37 Upload successful: 2021-11-29_15h31m23s.mp4
+2021-11-29 15:31:56.795 STOP MOTION ----------
+2021-11-29 15:33:36.929 START MOTION ---------
+2021-11-29 15:33:36 Video file /home/pi/2021-11-29_15h33m36s.mp4 queued for uploading
+2021-11-29 15:33:37 Trying to upload: 2021-11-29_15h33m36s.mp4
+2021-11-29 15:33:41.9 STOP MOTION ----------
+2021-11-29 15:33:45 Upload successful: 2021-11-29_15h33m36s.mp4
+2021-11-29 15:33:56.927 START MOTION ---------
+2021-11-29 15:33:56 Video file /home/pi/2021-11-29_15h33m56s.mp4 queued for uploading
+2021-11-29 15:34:05 Trying to upload: 2021-11-29_15h33m56s.mp4
+2021-11-29 15:34:09.857 STOP MOTION ----------
+2021-11-29 15:34:15.54 START MOTION ---------
+2021-11-29 15:34:15 Video file /home/pi/2021-11-29_15h34m15s.mp4 queued for uploading
+2021-11-29 15:34:23 Upload successful: 2021-11-29_15h33m56s.mp4
+2021-11-29 15:34:24.157 STOP MOTION ----------
+2021-11-29 15:34:33 Trying to upload: 2021-11-29_15h34m15s.mp4
+2021-11-29 15:34:50.49 START MOTION ---------
+2021-11-29 15:34:50 Video file /home/pi/2021-11-29_15h34m50s.mp4 queued for uploading
+2021-11-29 15:34:55 Upload successful: 2021-11-29_15h34m15s.mp4
+2021-11-29 15:35:05 Trying to upload: 2021-11-29_15h34m50s.mp4
+2021-11-29 15:35:16.687 STOP MOTION ----------
+2021-11-29 15:35:36 Firebase storage not reachable: TransferInvalidError
+ trying to reconnect in 8 sec
+2021-11-29 15:35:44 Trying to upload: 2021-11-29_15h34m50s.mp4
+2021-11-29 15:36:38 Upload successful: 2021-11-29_15h34m50s.mp4
+2021-11-29 15:37:12.588 START MOTION ---------
+2021-11-29 15:37:12 Video file /home/pi/2021-11-29_15h37m12s.mp4 queued for uploading
+2021-11-29 15:37:15.866 STOP MOTION ----------
+2021-11-29 15:37:18 Trying to upload: 2021-11-29_15h37m12s.mp4
+2021-11-29 15:37:32 Upload successful: 2021-11-29_15h37m12s.mp4
+2021-11-29 15:44:06.647 START MOTION ---------
+2021-11-29 15:44:06 Video file /home/pi/2021-11-29_15h44m06s.mp4 queued for uploading
+2021-11-29 15:44:09.898 STOP MOTION ----------
+2021-11-29 15:44:12 Trying to upload: 2021-11-29_15h44m06s.mp4
+2021-11-29 15:44:51 Upload successful: 2021-11-29_15h44m06s.mp4
+2021-11-29 15:50:47.837 START MOTION ---------
+2021-11-29 15:50:47 Video file /home/pi/2021-11-29_15h50m47s.mp4 queued for uploading
+2021-11-29 15:50:51 Trying to upload: 2021-11-29_15h50m47s.mp4
+2021-11-29 15:50:56.549 STOP MOTION ----------
+2021-11-29 15:51:01.668 START MOTION ---------
+2021-11-29 15:51:01 Video file /home/pi/2021-11-29_15h51m01s.mp4 queued for uploading
+2021-11-29 15:51:17.746 STOP MOTION ----------
+2021-11-29 15:51:20.778 START MOTION ---------
+2021-11-29 15:51:20 Video file /home/pi/2021-11-29_15h51m20s.mp4 queued for uploading
+2021-11-29 15:51:26 Upload successful: 2021-11-29_15h50m47s.mp4
+2021-11-29 15:51:35.840 STOP MOTION ----------
+2021-11-29 15:51:36 Trying to upload: 2021-11-29_15h51m01s.mp4
+2021-11-29 15:51:38.382 START MOTION ---------
+2021-11-29 15:51:38 Video file /home/pi/2021-11-29_15h51m38s.mp4 queued for uploading
+2021-11-29 15:51:51.586 STOP MOTION ----------
+2021-11-29 15:52:08 Upload successful: 2021-11-29_15h51m01s.mp4
+2021-11-29 15:52:08 Trying to upload: 2021-11-29_15h51m20s.mp4
+2021-11-29 15:52:12.572 START MOTION ---------
+2021-11-29 15:52:12 Video file /home/pi/2021-11-29_15h52m12s.mp4 queued for uploading
+2021-11-29 15:52:20.620 STOP MOTION ----------
+2021-11-29 15:52:32 Upload successful: 2021-11-29_15h51m20s.mp4
+2021-11-29 15:52:42 Trying to upload: 2021-11-29_15h51m38s.mp4
+2021-11-29 15:53:07 Upload successful: 2021-11-29_15h51m38s.mp4
+2021-11-29 15:53:07 Trying to upload: 2021-11-29_15h52m12s.mp4
+2021-11-29 15:53:25 Upload successful: 2021-11-29_15h52m12s.mp4
+2021-11-29 15:53:43.332 START MOTION ---------
+2021-11-29 15:53:43 Video file /home/pi/2021-11-29_15h53m43s.mp4 queued for uploading
+2021-11-29 15:53:45 Trying to upload: 2021-11-29_15h53m43s.mp4
+2021-11-29 15:53:54 Upload successful: 2021-11-29_15h53m43s.mp4
+2021-11-29 15:54:31.365 STOP MOTION ----------
+2021-11-29 15:54:37.543 START MOTION ---------
+2021-11-29 15:54:37 Video file /home/pi/2021-11-29_15h54m37s.mp4 queued for uploading
+2021-11-29 15:54:44 Trying to upload: 2021-11-29_15h54m37s.mp4
+2021-11-29 15:54:53.803 STOP MOTION ----------
+2021-11-29 15:55:05 Upload successful: 2021-11-29_15h54m37s.mp4
+2021-11-29 15:59:14.950 START MOTION ---------
+2021-11-29 15:59:14 Video file /home/pi/2021-11-29_15h59m14s.mp4 queued for uploading
+2021-11-29 15:59:15 Trying to upload: 2021-11-29_15h59m14s.mp4
+2021-11-29 15:59:31 Upload successful: 2021-11-29_15h59m14s.mp4
+2021-11-29 16:00:03.564 STOP MOTION ----------
+2021-11-29 16:12:28.536 START MOTION ---------
+2021-11-29 16:12:28 Video file /home/pi/2021-11-29_16h12m28s.mp4 queued for uploading
+2021-11-29 16:12:31 Trying to upload: 2021-11-29_16h12m28s.mp4
+2021-11-29 16:12:33.583 STOP MOTION ----------
+2021-11-29 16:12:41 Upload successful: 2021-11-29_16h12m28s.mp4
+2021-11-29 16:18:11.650 START MOTION ---------
+2021-11-29 16:18:11 Video file /home/pi/2021-11-29_16h18m11s.mp4 queued for uploading
+2021-11-29 16:18:17.216 STOP MOTION ----------
+2021-11-29 16:18:21 Trying to upload: 2021-11-29_16h18m11s.mp4
+2021-11-29 16:18:35 Upload successful: 2021-11-29_16h18m11s.mp4
+2021-11-29 16:18:36.93 START MOTION ---------
+2021-11-29 16:18:36 Video file /home/pi/2021-11-29_16h18m36s.mp4 queued for uploading
+2021-11-29 16:18:45 Trying to upload: 2021-11-29_16h18m36s.mp4
+2021-11-29 16:18:48.570 STOP MOTION ----------
+2021-11-29 16:19:00 Upload successful: 2021-11-29_16h18m36s.mp4
+2021-11-29 16:24:17.478 START MOTION ---------
+2021-11-29 16:24:17 Video file /home/pi/2021-11-29_16h24m17s.mp4 queued for uploading
+2021-11-29 16:24:20 Trying to upload: 2021-11-29_16h24m17s.mp4
+2021-11-29 16:24:24.234 STOP MOTION ----------
+2021-11-29 16:24:30 Upload successful: 2021-11-29_16h24m17s.mp4
+2021-11-29 16:41:26.346 START MOTION ---------
+2021-11-29 16:41:26 Video file /home/pi/2021-11-29_16h41m26s.mp4 queued for uploading
+2021-11-29 16:41:30 Trying to upload: 2021-11-29_16h41m26s.mp4
+2021-11-29 16:41:33.854 STOP MOTION ----------
+2021-11-29 16:41:40 Upload successful: 2021-11-29_16h41m26s.mp4
+2021-11-29 16:46:20.621 START MOTION ---------
+2021-11-29 16:46:20 Video file /home/pi/2021-11-29_16h46m20s.mp4 queued for uploading
+2021-11-29 16:46:25.744 STOP MOTION ----------
+2021-11-29 16:46:30 Trying to upload: 2021-11-29_16h46m20s.mp4
+2021-11-29 16:46:40 Upload successful: 2021-11-29_16h46m20s.mp4
+2021-11-29 16:53:25.502 START MOTION ---------
+2021-11-29 16:53:25 Video file /home/pi/2021-11-29_16h53m25s.mp4 queued for uploading
+2021-11-29 16:53:30 Trying to upload: 2021-11-29_16h53m25s.mp4
+2021-11-29 16:53:34 Upload successful: 2021-11-29_16h53m25s.mp4
+2021-11-29 16:54:03.827 STOP MOTION ----------
+2021-11-29 17:02:47.221 START MOTION ---------
+2021-11-29 17:02:47 Video file /home/pi/2021-11-29_17h02m47s.mp4 queued for uploading
+2021-11-29 17:02:52.935 STOP MOTION ----------
+2021-11-29 17:02:54 Trying to upload: 2021-11-29_17h02m47s.mp4
+2021-11-29 17:02:58 Upload successful: 2021-11-29_17h02m47s.mp4
+2021-11-29 17:09:48.406 START MOTION ---------
+2021-11-29 17:09:48 Video file /home/pi/2021-11-29_17h09m48s.mp4 queued for uploading
+2021-11-29 17:09:48 Trying to upload: 2021-11-29_17h09m48s.mp4
+2021-11-29 17:09:52.92 STOP MOTION ----------
+2021-11-29 17:09:52 Upload successful: 2021-11-29_17h09m48s.mp4
+2021-11-29 17:17:07.778 START MOTION ---------
+2021-11-29 17:17:07 Video file /home/pi/2021-11-29_17h17m07s.mp4 queued for uploading
+2021-11-29 17:17:12 Trying to upload: 2021-11-29_17h17m07s.mp4
+2021-11-29 17:17:16 Upload successful: 2021-11-29_17h17m07s.mp4
+2021-11-29 17:18:15.517 STOP MOTION ----------
+2021-11-29 17:31:06.137 START MOTION ---------
+2021-11-29 17:31:06 Video file /home/pi/2021-11-29_17h31m06s.mp4 queued for uploading
+2021-11-29 17:31:06 Trying to upload: 2021-11-29_17h31m06s.mp4
+2021-11-29 17:31:10 Upload successful: 2021-11-29_17h31m06s.mp4
+2021-11-29 17:31:16.288 STOP MOTION ----------
+2021-11-29 17:33:41.788 START MOTION ---------
+2021-11-29 17:33:41 Video file /home/pi/2021-11-29_17h33m41s.mp4 queued for uploading
+2021-11-29 17:33:50 Trying to upload: 2021-11-29_17h33m41s.mp4
+2021-11-29 17:33:55 Upload successful: 2021-11-29_17h33m41s.mp4
+2021-11-29 17:34:01.383 STOP MOTION ----------
+2021-11-29 17:36:10.400 START MOTION ---------
+2021-11-29 17:36:10 Video file /home/pi/2021-11-29_17h36m10s.mp4 queued for uploading
+2021-11-29 17:36:15 Trying to upload: 2021-11-29_17h36m10s.mp4
+2021-11-29 17:36:20 Upload successful: 2021-11-29_17h36m10s.mp4
+2021-11-29 17:36:28.926 STOP MOTION ----------
+2021-11-29 17:38:17.177 START MOTION ---------
+2021-11-29 17:38:17 Video file /home/pi/2021-11-29_17h38m17s.mp4 queued for uploading
+2021-11-29 17:38:20 Trying to upload: 2021-11-29_17h38m17s.mp4
+2021-11-29 17:38:21 Upload successful: 2021-11-29_17h38m17s.mp4
+2021-11-29 17:38:55.490 STOP MOTION ----------
+2021-11-29 17:42:42.926 START MOTION ---------
+2021-11-29 17:42:42 Video file /home/pi/2021-11-29_17h42m42s.mp4 queued for uploading
+2021-11-29 17:42:51 Trying to upload: 2021-11-29_17h42m42s.mp4
+2021-11-29 17:43:03.544 STOP MOTION ----------
+2021-11-29 17:43:04 Upload successful: 2021-11-29_17h42m42s.mp4
+2021-11-29 17:48:44.924 START MOTION ---------
+2021-11-29 17:48:44 Video file /home/pi/2021-11-29_17h48m44s.mp4 queued for uploading
+2021-11-29 17:48:54 Trying to upload: 2021-11-29_17h48m44s.mp4
+2021-11-29 17:49:08 Upload successful: 2021-11-29_17h48m44s.mp4
+2021-11-29 17:49:32.280 STOP MOTION ----------
+2021-11-29 17:50:19.309 START MOTION ---------
+2021-11-29 17:50:19 Video file /home/pi/2021-11-29_17h50m19s.mp4 queued for uploading
+2021-11-29 17:50:28 Trying to upload: 2021-11-29_17h50m19s.mp4
+2021-11-29 17:50:32 Upload successful: 2021-11-29_17h50m19s.mp4
+2021-11-29 17:50:40.995 STOP MOTION ----------
+2021-11-29 17:54:07.139 START MOTION ---------
+2021-11-29 17:54:07 Video file /home/pi/2021-11-29_17h54m07s.mp4 queued for uploading
+2021-11-29 17:54:12 Trying to upload: 2021-11-29_17h54m07s.mp4
+2021-11-29 17:54:18 Upload successful: 2021-11-29_17h54m07s.mp4
+2021-11-29 17:54:21.611 STOP MOTION ----------
+2021-11-29 17:56:58.209 START MOTION ---------
+2021-11-29 17:56:58 Video file /home/pi/2021-11-29_17h56m58s.mp4 queued for uploading
+2021-11-29 17:56:58 Trying to upload: 2021-11-29_17h56m58s.mp4
+2021-11-29 17:56:59 Upload successful: 2021-11-29_17h56m58s.mp4
+2021-11-29 17:57:29.24 STOP MOTION ----------
+2021-11-29 17:58:39.897 START MOTION ---------
+2021-11-29 17:58:39 Video file /home/pi/2021-11-29_17h58m39s.mp4 queued for uploading
+2021-11-29 17:58:49 Trying to upload: 2021-11-29_17h58m39s.mp4
+2021-11-29 17:58:54 Upload successful: 2021-11-29_17h58m39s.mp4
+2021-11-29 17:59:02.703 STOP MOTION ----------
+2021-11-29 18:01:23.629 START MOTION ---------
+2021-11-29 18:01:23 Video file /home/pi/2021-11-29_18h01m23s.mp4 queued for uploading
+2021-11-29 18:01:24 Trying to upload: 2021-11-29_18h01m23s.mp4
+2021-11-29 18:01:27 Upload successful: 2021-11-29_18h01m23s.mp4
+2021-11-29 18:02:02.805 STOP MOTION ----------
+2021-11-29 18:02:31.919 START MOTION ---------
+2021-11-29 18:02:31 Video file /home/pi/2021-11-29_18h02m31s.mp4 queued for uploading
+2021-11-29 18:02:37 Trying to upload: 2021-11-29_18h02m31s.mp4
+2021-11-29 18:02:39 Upload successful: 2021-11-29_18h02m31s.mp4
+2021-11-29 18:02:42.248 STOP MOTION ----------
+2021-11-29 18:02:46.807 START MOTION ---------
+2021-11-29 18:02:46 Video file /home/pi/2021-11-29_18h02m46s.mp4 queued for uploading
+2021-11-29 18:02:49 Trying to upload: 2021-11-29_18h02m46s.mp4
+2021-11-29 18:02:50 Upload successful: 2021-11-29_18h02m46s.mp4
+2021-11-29 18:03:37.998 STOP MOTION ----------
+2021-11-29 18:07:41.731 START MOTION ---------
+2021-11-29 18:07:41 Video file /home/pi/2021-11-29_18h07m41s.mp4 queued for uploading
+2021-11-29 18:07:44.358 STOP MOTION ----------
+2021-11-29 18:07:50 Trying to upload: 2021-11-29_18h07m41s.mp4
+2021-11-29 18:07:55 Upload successful: 2021-11-29_18h07m41s.mp4
+2021-11-29 18:18:47.303 START MOTION ---------
+2021-11-29 18:18:47 Video file /home/pi/2021-11-29_18h18m47s.mp4 queued for uploading
+2021-11-29 18:18:55 Trying to upload: 2021-11-29_18h18m47s.mp4
+2021-11-29 18:19:02 Upload successful: 2021-11-29_18h18m47s.mp4
+2021-11-29 18:19:07.619 STOP MOTION ----------
+2021-11-29 18:36:53.518 START MOTION ---------
+2021-11-29 18:36:53 Video file /home/pi/2021-11-29_18h36m53s.mp4 queued for uploading
+2021-11-29 18:36:57.846 STOP MOTION ----------
+2021-11-29 18:37:02 Trying to upload: 2021-11-29_18h36m53s.mp4
+2021-11-29 18:37:11 Upload successful: 2021-11-29_18h36m53s.mp4
+2021-11-29 18:39:31.179 START MOTION ---------
+2021-11-29 18:39:31 Video file /home/pi/2021-11-29_18h39m31s.mp4 queued for uploading
+2021-11-29 18:39:41 Trying to upload: 2021-11-29_18h39m31s.mp4
+2021-11-29 18:39:47 Upload successful: 2021-11-29_18h39m31s.mp4
+2021-11-29 18:39:58.454 STOP MOTION ----------
+2021-11-29 18:40:03.818 START MOTION ---------
+2021-11-29 18:40:03 Video file /home/pi/2021-11-29_18h40m03s.mp4 queued for uploading
+2021-11-29 18:40:07 Trying to upload: 2021-11-29_18h40m03s.mp4
+2021-11-29 18:40:09 Upload successful: 2021-11-29_18h40m03s.mp4
+2021-11-29 18:40:24.864 STOP MOTION ----------
+2021-11-29 18:40:40.937 START MOTION ---------
+2021-11-29 18:40:40 Video file /home/pi/2021-11-29_18h40m40s.mp4 queued for uploading
+2021-11-29 18:40:49 Trying to upload: 2021-11-29_18h40m40s.mp4
+2021-11-29 18:40:56 Upload successful: 2021-11-29_18h40m40s.mp4
+2021-11-29 18:41:11.160 STOP MOTION ----------
+2021-11-29 18:49:44.705 START MOTION ---------
+2021-11-29 18:49:44 Video file /home/pi/2021-11-29_18h49m44s.mp4 queued for uploading
+2021-11-29 18:49:46 Trying to upload: 2021-11-29_18h49m44s.mp4
+2021-11-29 18:49:57 Upload successful: 2021-11-29_18h49m44s.mp4
+2021-11-29 18:50:33.749 STOP MOTION ----------
+2021-11-29 18:51:11.170 START MOTION ---------
+2021-11-29 18:51:11 Video file /home/pi/2021-11-29_18h51m11s.mp4 queued for uploading
+2021-11-29 18:51:14.920 STOP MOTION ----------
+2021-11-29 18:51:17 Trying to upload: 2021-11-29_18h51m11s.mp4
+2021-11-29 18:51:23 Upload successful: 2021-11-29_18h51m11s.mp4
+2021-11-29 19:11:56.509 START MOTION ---------
+2021-11-29 19:11:56 Video file /home/pi/2021-11-29_19h11m56s.mp4 queued for uploading
+2021-11-29 19:12:03 Trying to upload: 2021-11-29_19h11m56s.mp4
+2021-11-29 19:12:11 Upload successful: 2021-11-29_19h11m56s.mp4
+2021-11-29 19:13:02.176 STOP MOTION ----------
+2021-11-29 19:16:04.232 START MOTION ---------
+2021-11-29 19:16:04 Video file /home/pi/2021-11-29_19h16m04s.mp4 queued for uploading
+2021-11-29 19:16:10.141 STOP MOTION ----------
+2021-11-29 19:16:11 Trying to upload: 2021-11-29_19h16m04s.mp4
+2021-11-29 19:16:18 Upload successful: 2021-11-29_19h16m04s.mp4
+2021-11-29 19:21:49.217 START MOTION ---------
+2021-11-29 19:21:49 Video file /home/pi/2021-11-29_19h21m49s.mp4 queued for uploading
+2021-11-29 19:21:58.722 STOP MOTION ----------
+2021-11-29 19:21:58 Trying to upload: 2021-11-29_19h21m49s.mp4
+2021-11-29 19:22:13 Upload successful: 2021-11-29_19h21m49s.mp4
+2021-11-29 19:25:29.178 START MOTION ---------
+2021-11-29 19:25:29 Video file /home/pi/2021-11-29_19h25m29s.mp4 queued for uploading
+2021-11-29 19:25:33 Trying to upload: 2021-11-29_19h25m29s.mp4
+2021-11-29 19:25:39 Upload successful: 2021-11-29_19h25m29s.mp4
+2021-11-29 19:25:51.656 STOP MOTION ----------
+2021-11-29 19:29:23.131 START MOTION ---------
+2021-11-29 19:29:23 Video file /home/pi/2021-11-29_19h29m23s.mp4 queued for uploading
+2021-11-29 19:29:29 Trying to upload: 2021-11-29_19h29m23s.mp4
+2021-11-29 19:29:31.370 STOP MOTION ----------
+2021-11-29 19:29:34 Upload successful: 2021-11-29_19h29m23s.mp4
+2021-11-29 19:32:54.541 START MOTION ---------
+2021-11-29 19:32:54 Video file /home/pi/2021-11-29_19h32m54s.mp4 queued for uploading
+2021-11-29 19:33:04 Trying to upload: 2021-11-29_19h32m54s.mp4
+2021-11-29 19:33:10.624 STOP MOTION ----------
+2021-11-29 19:33:17 Upload successful: 2021-11-29_19h32m54s.mp4
+2021-11-29 19:35:06.998 START MOTION ---------
+2021-11-29 19:35:07 Video file /home/pi/2021-11-29_19h35m06s.mp4 queued for uploading
+2021-11-29 19:35:07 Trying to upload: 2021-11-29_19h35m06s.mp4
+2021-11-29 19:35:10 Upload successful: 2021-11-29_19h35m06s.mp4
+2021-11-29 19:35:10.288 STOP MOTION ----------
+2021-11-29 19:36:24.505 START MOTION ---------
+2021-11-29 19:36:24 Video file /home/pi/2021-11-29_19h36m24s.mp4 queued for uploading
+2021-11-29 19:36:27.224 STOP MOTION ----------
+2021-11-29 19:36:30 Trying to upload: 2021-11-29_19h36m24s.mp4
+2021-11-29 19:36:34 Upload successful: 2021-11-29_19h36m24s.mp4
+2021-11-29 19:36:45.153 START MOTION ---------
+2021-11-29 19:36:45 Video file /home/pi/2021-11-29_19h36m45s.mp4 queued for uploading
+2021-11-29 19:36:51.887 STOP MOTION ----------
+2021-11-29 19:36:54 Trying to upload: 2021-11-29_19h36m45s.mp4
+2021-11-29 19:37:00 Upload successful: 2021-11-29_19h36m45s.mp4
+2021-11-29 19:53:57.560 START MOTION ---------
+2021-11-29 19:53:57 Video file /home/pi/2021-11-29_19h53m57s.mp4 queued for uploading
+2021-11-29 19:54:00 Trying to upload: 2021-11-29_19h53m57s.mp4
+2021-11-29 19:54:02.753 STOP MOTION ----------
+2021-11-29 19:54:17 Upload successful: 2021-11-29_19h53m57s.mp4
+2021-11-29 20:36:08.544 START MOTION ---------
+2021-11-29 20:36:08 Video file /home/pi/2021-11-29_20h36m08s.mp4 queued for uploading
+2021-11-29 20:36:17 Trying to upload: 2021-11-29_20h36m08s.mp4
+2021-11-29 20:36:25 Upload successful: 2021-11-29_20h36m08s.mp4
+2021-11-29 20:36:55.4 STOP MOTION ----------
+2021-11-29 21:21:33.81 START MOTION ---------
+2021-11-29 21:21:33 Video file /home/pi/2021-11-29_21h21m33s.mp4 queued for uploading
+2021-11-29 21:21:35 Trying to upload: 2021-11-29_21h21m33s.mp4
+2021-11-29 21:21:41 Upload successful: 2021-11-29_21h21m33s.mp4
+2021-11-29 21:21:42.34 STOP MOTION ----------
+2021-11-29 21:31:29.696 START MOTION ---------
+2021-11-29 21:31:29 Video file /home/pi/2021-11-29_21h31m29s.mp4 queued for uploading
+2021-11-29 21:31:31 Trying to upload: 2021-11-29_21h31m29s.mp4
+2021-11-29 21:31:35 Upload successful: 2021-11-29_21h31m29s.mp4
+2021-11-29 21:32:02.650 STOP MOTION ----------
+2021-11-29 21:33:37.359 START MOTION ---------
+2021-11-29 21:33:37 Video file /home/pi/2021-11-29_21h33m37s.mp4 queued for uploading
+2021-11-29 21:33:44.85 STOP MOTION ----------
+2021-11-29 21:33:45 Trying to upload: 2021-11-29_21h33m37s.mp4
+2021-11-29 21:33:48 Upload successful: 2021-11-29_21h33m37s.mp4
+2021-11-29 21:38:32.759 START MOTION ---------
+2021-11-29 21:38:32 Video file /home/pi/2021-11-29_21h38m32s.mp4 queued for uploading
+2021-11-29 21:38:37.715 STOP MOTION ----------
+2021-11-29 21:38:38 Trying to upload: 2021-11-29_21h38m32s.mp4
+2021-11-29 21:38:43 Upload successful: 2021-11-29_21h38m32s.mp4
+2021-11-29 22:07:08.577 START MOTION ---------
+2021-11-29 22:07:08 Video file /home/pi/2021-11-29_22h07m08s.mp4 queued for uploading
+2021-11-29 22:07:13 Trying to upload: 2021-11-29_22h07m08s.mp4
+2021-11-29 22:07:18 Upload successful: 2021-11-29_22h07m08s.mp4
+2021-11-29 22:07:28.590 STOP MOTION ----------
+2021-11-29 22:19:18.236 START MOTION ---------
+2021-11-29 22:19:18 Video file /home/pi/2021-11-29_22h19m18s.mp4 queued for uploading
+2021-11-29 22:19:18 Trying to upload: 2021-11-29_22h19m18s.mp4
+2021-11-29 22:19:21 Upload successful: 2021-11-29_22h19m18s.mp4
+2021-11-29 22:19:23.434 STOP MOTION ----------
+2021-11-29 22:19:32.4 START MOTION ---------
+2021-11-29 22:19:32 Video file /home/pi/2021-11-29_22h19m32s.mp4 queued for uploading
+2021-11-29 22:19:35.912 STOP MOTION ----------
+2021-11-29 22:19:41 Trying to upload: 2021-11-29_22h19m32s.mp4
+2021-11-29 22:19:44 Upload successful: 2021-11-29_22h19m32s.mp4
+2021-11-29 22:39:16.285 START MOTION ---------
+2021-11-29 22:39:16 Video file /home/pi/2021-11-29_22h39m16s.mp4 queued for uploading
+2021-11-29 22:39:24 Trying to upload: 2021-11-29_22h39m16s.mp4
+2021-11-29 22:39:37 Upload successful: 2021-11-29_22h39m16s.mp4
+2021-11-29 22:39:40.999 STOP MOTION ----------
+2021-11-29 22:40:07.237 START MOTION ---------
+2021-11-29 22:40:07 Video file /home/pi/2021-11-29_22h40m07s.mp4 queued for uploading
+2021-11-29 22:40:07 Trying to upload: 2021-11-29_22h40m07s.mp4
+2021-11-29 22:40:09 Upload successful: 2021-11-29_22h40m07s.mp4
+2021-11-29 22:40:38.351 STOP MOTION ----------
+2021-11-29 23:28:41.843 START MOTION ---------
+2021-11-29 23:28:41 Video file /home/pi/2021-11-29_23h28m41s.mp4 queued for uploading
+2021-11-29 23:28:44.343 STOP MOTION ----------
+2021-11-29 23:28:48.482 START MOTION ---------
+2021-11-29 23:28:48 Video file /home/pi/2021-11-29_23h28m48s.mp4 queued for uploading
+2021-11-29 23:28:49 Trying to upload: 2021-11-29_23h28m41s.mp4
+2021-11-29 23:28:54 Upload successful: 2021-11-29_23h28m41s.mp4
+2021-11-29 23:28:54 Trying to upload: 2021-11-29_23h28m48s.mp4
+2021-11-29 23:28:55 Upload successful: 2021-11-29_23h28m48s.mp4
+2021-11-29 23:29:21.837 STOP MOTION ----------
+2021-11-30 02:22:53.868 START MOTION ---------
+2021-11-30 02:22:53 Video file /home/pi/2021-11-30_02h22m53s.mp4 queued for uploading
+2021-11-30 02:22:56 Trying to upload: 2021-11-30_02h22m53s.mp4
+2021-11-30 02:23:06 Upload successful: 2021-11-30_02h22m53s.mp4
+2021-11-30 02:23:18.818 STOP MOTION ----------
+2021-11-30 02:23:50.190 START MOTION ---------
+2021-11-30 02:23:50 Video file /home/pi/2021-11-30_02h23m50s.mp4 queued for uploading
+2021-11-30 02:23:56 Trying to upload: 2021-11-30_02h23m50s.mp4
+2021-11-30 02:23:58 Upload successful: 2021-11-30_02h23m50s.mp4
+2021-11-30 02:24:14.809 STOP MOTION ----------
+2021-11-30 02:24:41.530 START MOTION ---------
+2021-11-30 02:24:41 Video file /home/pi/2021-11-30_02h24m41s.mp4 queued for uploading
+2021-11-30 02:24:48.252 STOP MOTION ----------
+2021-11-30 02:24:48 Trying to upload: 2021-11-30_02h24m41s.mp4
+2021-11-30 02:24:50 Upload successful: 2021-11-30_02h24m41s.mp4
+2021-11-30 02:25:04.557 START MOTION ---------
+2021-11-30 02:25:04 Video file /home/pi/2021-11-30_02h25m04s.mp4 queued for uploading
+2021-11-30 02:25:10 Trying to upload: 2021-11-30_02h25m04s.mp4
+2021-11-30 02:25:13 Upload successful: 2021-11-30_02h25m04s.mp4
+2021-11-30 02:25:27.672 STOP MOTION ----------

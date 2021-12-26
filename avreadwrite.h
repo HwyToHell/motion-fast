@@ -1,5 +1,5 @@
-#ifndef LIBAVREADWRITE_H
-#define LIBAVREADWRITE_H
+#ifndef AVREADWRITE_H
+#define AVREADWRITE_H
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -16,6 +16,8 @@ void errLog(const char * file, int line, std::string msg, int error = 0);
 // it will vanish with C++20 when __VA_OPT__ becomes available
 // https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
 #define avErrMsg( msg, ... ) errLog( __FILE__, __LINE__, msg, ##__VA_ARGS__ )
+
+void printAVErrorCodes();
 
 struct VideoStream
 {
@@ -82,4 +84,4 @@ private:
     int64_t             m_packetCount;
 };
 
-#endif // LIBAVREADWRITE_H
+#endif // AVREADWRITE_H

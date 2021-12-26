@@ -1,4 +1,4 @@
-#include "libavreadwrite.h"
+#include "avreadwrite.h"
 
 
 void errLog(const char * file, int line, std::string msg, int avError)
@@ -17,6 +17,21 @@ void errLog(const char * file, int line, std::string msg, int avError)
         std::cerr << ": " << avErrString;
     }
     std::cerr << std::endl << "  (" << file << ":" << line <<")" << std::endl;
+}
+
+
+void printAVErrorCodes()
+{
+    std::map<std::string, int> errorCodes;
+    errorCodes.insert({"AVERROR_EOF: ", AVERROR_EOF});
+    errorCodes.insert({"AVERROR_INVALIDDATA: ", AVERROR_INVALIDDATA});
+    errorCodes.insert({"ENETUNREACH: ", ENETUNREACH});  // errno.h
+    errorCodes.insert({"ETIMEDOUT: ", ETIMEDOUT});      // errno.h
+    errorCodes.insert({"AVERROR(ENETUNREACH): ", AVERROR(ENETUNREACH)});
+    errorCodes.insert({"AVERROR(ETIMEDOUT): ", AVERROR(ETIMEDOUT)});
+    for (auto [key, value] : errorCodes) {
+        std::cout << key << value << std::endl;
+    }
 }
 
 

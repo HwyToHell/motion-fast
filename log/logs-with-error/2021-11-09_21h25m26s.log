@@ -1,0 +1,22 @@
+Log saved to: /home/pi/2021-11-09_03h00m06s.log
+Device manager connected to 192.168.1.10
+Camera time set to: 2021-11-09 03:00:06
+Device manager disconnected
+Path to clean from old video files: /home/pi
+Remove /home/pi/2021-11-01_13h42m37s.mp4
+Remove /home/pi/2021-11-01_13h44m19s.mp4
+Remove /home/pi/2021-11-01_15h17m32s.mp4
+2021-11-09 03:00:09.369 Open video input: rtsp://admin:@192.168.1.10
+2021-11-09 03:00:10.370 Send SIGUSR1 to PID 15254 to terminate video processing
+2021-11-09 03:00:11.890 Queue of size: 34 discharged at 2.95382 sec
+End of file or stream
+2021-11-09 03:23:20.741Video processing discontinued
+Reading errors: 1, seconds since last error: 1391
+Failed to open input: Invalid data found when processing input
+  (../../motion-fast/avreadwrite.cpp:243)
+2021-11-09 03:23:25.855Failed to open input: rtsp://admin:@192.168.1.10
+[22;31m2021-11-09 03:23:25.855 Terminate application
+[0m2021-11-09 03:23:25.855 Waiting for worker threads to join
+2021-11-09 03:23:25.862 Motion detection thread joined
+2021-11-09 03:23:25.863 Write packets thread joined
+restart motion process

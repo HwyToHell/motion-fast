@@ -1,0 +1,41 @@
+2021-11-30 03:00:01 Log saved to: /home/pi/2021-11-30_03h00m01s.log
+2021-11-30 03:00:01 Restart motion and firebase uploader
+2021-11-30 03:00:01 SIGUSR1 to 'motion' process (PID 13056) sent, wait for finish
+SIGUSR1 received
+
+2021-11-30 03:00:01.340 SIGUSR1 received, terminating video processing
+[22;31m2021-11-30 03:00:01.341 Terminate application
+[0m2021-11-30 03:00:01.341 Waiting for worker threads to join
+2021-11-30 03:00:01.371 Motion detection thread joined
+2021-11-30 03:00:01.372 Write packets thread joined
+2021-11-30 03:00:02 Instance of 'motion' has finished, restart
+Device manager connected to 192.168.1.10
+Camera time set to: 2021-11-30 03:00:02
+Device manager disconnected
+Path to clean from old video files: /home/pi
+2021-11-30 03:00:05.350 Open video input: rtsp://admin:@192.168.1.10
+2021-11-30 03:00:06.351 Send SIGUSR1 to PID 19162 to terminate video processing
+2021-11-30 03:00:07.809 Queue of size: 35 discharged at 3.92303 sec
+2021-11-30 03:00:11 SIGUSR1 to 'upload-videos' process (PID 14413) sent, wait for finish
+2021-11-30 03:00:11 SIGUSR1 received, terminate 'upload-videos.py'
+2021-11-30 03:00:12 Files left for upload: 0
+
+2021-11-30 03:00:16 Instance of 'upload-videos' has finished, restart
+2021-11-30 03:00:17 Script 'upload-videos.py' started, send SIGUSR1 to PID 20693 to terminate
+2021-11-30 03:00:17 Monitoring directory /home/pi for new video files
+2021-11-30 03:00:17 Removing files prior to 2021-11-25 00:00:00
+2021-11-30 03:00:23 All files removed
+End of file or stream
+2021-11-30 03:23:13.518 Video processing discontinued
+Reading errors: 1, seconds since last error: 1388
+Failed to open input: Invalid data found when processing input
+  (../../motion-fast/avreadwrite.cpp:243)
+2021-11-30 03:23:18.634Connection timed out, trying to re-connect in 14 sec2021-11-30 03:23:19.635Connection timed out, trying to re-connect in 13 sec2021-11-30 03:23:20.635Connection timed out, trying to re-connect in 12 sec2021-11-30 03:23:21.635Connection timed out, trying to re-connect in 11 sec2021-11-30 03:23:22.636Connection timed out, trying to re-connect in 10 sec2021-11-30 03:23:23.636Connection timed out, trying to re-connect in  9 sec2021-11-30 03:23:24.636Connection timed out, trying to re-connect in  8 sec2021-11-30 03:23:25.636Connection timed out, trying to re-connect in  7 sec2021-11-30 03:23:26.637Connection timed out, trying to re-connect in  6 sec2021-11-30 03:23:27.637Connection timed out, trying to re-connect in  5 sec2021-11-30 03:23:28.637Connection timed out, trying to re-connect in  4 sec2021-11-30 03:23:29.638Connection timed out, trying to re-connect in  3 sec2021-11-30 03:23:30.641Connection timed out, trying to re-connect in  2 sec2021-11-30 03:23:31.642Connection timed out, trying to re-connect in  1 sec2021-11-30 03:23:32.642Connection timed out, trying to re-connect in  0 secRe-connecting ...                                      
+[tcp @ 0x1e83940] Connection to tcp://192.168.1.10:554?timeout=5000000 failed: Verbindungsaufbau abgelehnt
+Failed to open input: Verbindungsaufbau abgelehnt
+  (../../motion-fast/avreadwrite.cpp:243)
+2021-11-30 03:23:33.652 Failed to open input: rtsp://admin:@192.168.1.10
+[22;31m2021-11-30 03:23:33.653 Terminate application
+[0m2021-11-30 03:23:33.653 Waiting for worker threads to join
+2021-11-30 03:23:33.659 Motion detection thread joined
+2021-11-30 03:23:33.659 Write packets thread joined

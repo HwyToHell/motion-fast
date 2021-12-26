@@ -1,5 +1,4 @@
-#include "libavreadwrite.h"
-#include "circularbuffer.h"
+#include "avreadwrite.h"
 #include "motion-detector.h"
 #include "perfcounter.h"
 #include "safebuffer.h"
@@ -8,8 +7,15 @@
 // color cursor and getkey
 #include "../cpp/inc/rlutil.h"
 
+// opencv
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/utils/filesystem.hpp>
+
+// qt
+#include <QCoreApplication>
+#include <QCommandLineParser>
+#include <QRect>
+#include <QSettings>
 
 // std
 #include <atomic>
@@ -18,6 +24,9 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
+
+#include <csignal>
+#include <unistd.h> // getpid
 
 #ifdef DEBUG_BUILD
     #define DEBUG(x) do { std::cout << x << std::endl; } while (0)
@@ -28,49 +37,51 @@
 #define DEBUGMSG(x) do { std::cout << x << std::endl; } while (0)
 
 
+// GLOBALS
+static volatile std::sig_atomic_t g_terminate = 0;
 
 // CLASSES
-struct Detector
-{
-    double      bgrSubThreshold;
-    int         minMotionDuration;
-    int         minMotionIntensity;
-    cv::Rect    roi;
-    double      scaleFrame;
-    bool        debug;
-    char        avoidPaddingWarning1[7];
-};
-
-
-struct Motion
+struct MotionCondition
 {
     std::condition_variable startCnd;
     std::mutex              startMtx;
-    int                     postCapture; // preCapture determined by key frame distance
     bool                    start;
     std::atomic_bool        stop;
     bool                    writeInProgress;
-    char                    avoidPaddingWarning1[1];
+    char                    avoidPaddingWarning1[5];
 };
+
+
+struct Params
+{
+    Params();
+    Params(const Params&) = default;
+    ~Params();
+    DetectorParams      detector;
+    void                loadSettings();
+    void                saveSettings();
+};
+
 
 struct State
 {
-    std::thread             threadMotionDetection;
-    std::thread             threadWritePackets;
-    Detector                detector;
-    Motion                  motion;
-    std::vector<SensDiag>   motionDiag;
-    VideoStream             streamInfo;
-    long long               errorCount;
-    TimePoint               timeLastError;
-    std::condition_variable resetDoneCnd;
-    std::mutex              resetDoneMtx;
-    bool                    reset;
-    bool                    resetDone;
-    bool                    terminate;
-    bool                    debug;
-    char                    avoidPaddingWarning1[4];
+    std::thread                 threadMotionDetection;
+    std::thread                 threadWritePackets;
+    DetectorParams              detector;
+    MotionCondition             motion;
+    std::vector<MotionDiagPic>  motionDiag;
+    VideoStream                 streamInfo;
+    long long                   errorCount;
+    TimePoint                   timeLastError;
+    std::condition_variable     resetDoneCnd;
+    std::mutex                  resetDoneMtx;
+    bool                        reset;
+    bool                        resetDone;
+    bool                        terminate;
+    bool                        debug;
+    char                        avoidPaddingWarning1[4];
 };
+
 
 enum class WriteState
 {
@@ -80,29 +91,73 @@ enum class WriteState
 };
 
 
+
+// MEMBER FUNCTIONS
+// TODO move to separate class PersistentParams
+Params::Params()
+{
+    loadSettings();
+}
+
+Params::~Params()
+{
+    saveSettings();
+}
+
+void Params::loadSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MotionDetector");
+    detector.bgrSubThreshold = settings.value("bgrSubThreshold", 40).toDouble();
+    detector.debug = settings.value("debug", false).toBool();
+    detector.minMotionDuration = settings.value("minMotionDuration", 30).toInt();
+    detector.minMotionIntensity = settings.value("minMotionIntensity", 80).toInt();
+    QRect qRoi = settings.value("roi", QRect(0,0,0,0)).toRect();
+    detector.postCapture = settings.value("postBuffer", 25).toInt();
+    detector.roi = cv::Rect(qRoi.x(), qRoi.y(), qRoi.width(),qRoi.height());
+    detector.scaleFrame = settings.value("scaleFrame", 0.25).toDouble();
+    settings.endGroup();
+}
+
+void Params::saveSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MotionDetector");
+    settings.setValue("bgrSubThreshold", detector.bgrSubThreshold);
+    settings.setValue("debug", detector.debug);
+    settings.setValue("minMotionDuration", detector.minMotionDuration);
+    settings.setValue("minMotionIntensity", detector.minMotionIntensity);
+    QRect qRoi(detector.roi.x, detector.roi.y, detector.roi.width, detector.roi.height);
+    settings.setValue("roi", qRoi);
+    settings.setValue("postBuffer", detector.postCapture);
+    settings.setValue("scaleFrame", detector.scaleFrame);
+    settings.endGroup();
+}
+
+
+
 // FUNCTIONS
-int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState);
-bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer);
-void printAVErrorCodes();
-void printDetectionParams(SensDiag& diagSample);
+int detectMotion(PacketSafeQueue& packetQueue, State& appState);
 bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue,
                         PacketSafeCircularBuffer& preCaptureBuffer, State& appState);
 void resetWriter(State& appState, WriteState& writeState, LibavWriter& writer);
 long long secondsWithoutError(State& appState);
-void showDiagPics(std::vector<SensDiag>& diagPicBuffer);
+void sigHandler(int signum);
 void terminateThreads(PacketSafeQueue& packetQueue, PacketSafeCircularBuffer& buffer, State& appState);
 void waitForMotion(State& appState);
-bool writeDiagPicsToDisk(std::vector<SensDiag>& diagPicBuffer);
+bool writeDiagPicsToDisk(std::vector<MotionDiagPic>& diagPicBuffer);
 int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState);
 
 
 
 // motion detection thread func -> decode, bgrsub, notify
-int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
+int detectMotion(PacketSafeQueue& packetQueue, State& appState)
 {
     DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", thread motion started");
-    PerfCounter decode("decoding");
-    PerfCounter motion("motion detection");
+    // PerfCounter decode("decoding");
+    // PerfCounter motion("motion detection");
 
     LibavDecoder decoder;
     int ret = decoder.open(appState.streamInfo.videoCodecParameters);
@@ -119,47 +174,36 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
     detector.minMotionIntensity(appState.detector.minMotionIntensity); // pixels
 
     size_t npreIdxs = static_cast<size_t>(detector.minMotionDuration()) + 1;
-    CircularBuffer<SensDiag> diagBuffer(npreIdxs);
+    CircularBuffer<MotionDiagPic> diagBuffer(npreIdxs);
 
-    /*
-    cv::namedWindow("frame", cv::WINDOW_NORMAL);
-    cv::resizeWindow("frame", cv::Size(950, 500) );
-    cv::moveWindow("frame", 0, 0);
-
-    cv::namedWindow("motion_mask", cv::WINDOW_NORMAL);
-    cv::resizeWindow("motion_mask", cv::Size(950, 500) );
-    cv::moveWindow("motion_mask", 970, 0);
-    */
 
     while (!appState.terminate) {
         // decode queued packets, if new packets are available
         packetQueue.waitForNewPacket();
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", new packet received");
         if (appState.terminate) break;
-        int cntDecoded = 0;
-        bool badDecode = false;
 
+        bool badDecode = false;
         size_t queueSize = packetQueue.size();
 
         while (packetQueue.pop(packet)) {
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet " << cntDecoded << " popped, pts: " << packet->pts << ", size: " << packet->size);
             if (appState.terminate) break;
-            decode.startCount();
+            // decode.startCount();
             if ((badDecode = !decoder.decodePacket(packet))) {
                 std::cout << "Failed to decode packet for motion detection" << std::endl;
             }
             queueSize = (packetQueue.size() > queueSize) ? packetQueue.size() : queueSize;
 
             DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", packet decoded, queueSize: " << packetQueue.size());
-            decode.stopCount();
+            // decode.stopCount();
 
             av_packet_free(&packet);
-            // debug: count decoded packets
-            ++cntDecoded;
         }
 
-        if (queueSize > 1) {
-            std::cout << "queue of size: " << queueSize << " discharged at " << decoder.frameTime(appState.streamInfo.timeBase) << " sec" << std::endl;
+        /* DEBUG */
+        if (queueSize > 10) {
+            std::cout << getTimeStampMs() << " Queue of size: " << queueSize << " discharged at " << decoder.frameTime(appState.streamInfo.timeBase) << " sec" << std::endl;
         }
 
         // skip motion detection for partly decoded frames
@@ -172,12 +216,12 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", frame retrieved, time "  << decoder.frameTime(appState.streamInfo.timeBase) << " sec");
 
         // detect motion
-        motion.startCount();
+        // motion.startCount();
         bool isMotion = detector.isContinuousMotion(frame);
 
         // buffer last frame for diagnostics
         // TODO integrate into MotionDetector class
-        SensDiag sd;
+        MotionDiagPic sd;
         sd.frame = detector.resizedFrame().clone();
         sd.motion = detector.motionMask().clone();
         sd.motionDuration = detector.motionDuration();
@@ -187,7 +231,7 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
         if (isMotion) {
             if (!appState.motion.writeInProgress) {
                 std::cout << getTimeStampMs() << " START MOTION ---------" << std::endl;
-                createDiagPics(diagBuffer, appState.motionDiag);
+                if (appState.debug) createDiagPics(diagBuffer, appState.motionDiag);
                 {
                     std::lock_guard<std::mutex> lock(appState.motion.startMtx);
                     appState.motion.start = true;
@@ -202,113 +246,26 @@ int detectMotionCnd(PacketSafeQueue& packetQueue, State& appState)
                 appState.motion.stop = true;
             }
         }
-        motion.stopCount();
-
-
-        /*
-        cv::imshow("frame", frame);
-        cv::imshow("motion_mask", detector.motionMask());
-        if (cv::waitKey(10) == 27)
-            break;
-        */
+        // motion.stopCount();
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", motion detection finished");
 
         // detect motion dummy
         // std::this_thread::sleep_for(std::chrono::milliseconds(200));
         // DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__ << ", motion detection finished");
-
     }
 
-    // cv::destroyAllWindows();
     decoder.close();
 
 
+    /* DEBUG
     decode.printStatistics();
     motion.printStatistics();
-    detector.m_perfPre.printStatistics();
-    detector.m_perfApply.printStatistics();
-    detector.m_perfPost.printStatistics();
     //decode.printAllSamples();
     //motion.printAllSamples();
+    */
 
     return 0;
-}
-
-
-bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer)
-{
-    diagPicBuffer.clear();
-    size_t nSections = 4;
-    if (diagBuf.size() < nSections) {
-        std::cout << "diag buffer too small: " << diagBuf.size() << " elements" << std::endl;
-        return false;
-    } else {
-        size_t idxSteps = diagBuf.size() / (nSections);
-        for (size_t n = 0; n <= nSections; ++n) {
-            size_t idxRingBuf = (n * idxSteps);
-
-            // preIdx -> reverse index of circular buffer (head = oldest index)
-            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
-            // std::cout << "pre idx: " << preIdx << std::endl;
-            diagBuf.at(idxRingBuf).preIdx = preIdx;
-
-            printDetectionParams(diagBuf.at(idxRingBuf));
-            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
-        }
-        return true;
-    }
-}
-
-
-void printAVErrorCodes()
-{
-    std::map<std::string, int> errorCodes;
-    errorCodes.insert({"AVERROR_EOF: ", AVERROR_EOF});
-    errorCodes.insert({"AVERROR_INVALIDDATA: ", AVERROR_INVALIDDATA});
-    errorCodes.insert({"ENETUNREACH: ", ENETUNREACH});  // errno.h
-    errorCodes.insert({"ETIMEDOUT: ", ETIMEDOUT});      // errno.h
-    errorCodes.insert({"AVERROR(ENETUNREACH): ", AVERROR(ENETUNREACH)});
-    errorCodes.insert({"AVERROR(ETIMEDOUT): ", AVERROR(ETIMEDOUT)});
-    for (auto [key, value] : errorCodes) {
-        std::cout << key << value << std::endl;
-    }
-}
-
-
-void printDetectionParams(SensDiag& diagSample)
-{
-    const cv::Scalar blue(255,0,0);
-    const cv::Scalar green(0,255,0);
-    const cv::Scalar red(0,0,255);
-    int fontFace = cv::HersheyFonts::FONT_HERSHEY_SIMPLEX;
-    double fontScale = static_cast<double>(diagSample.frame.size().height) / 500;
-    int fontThickness = 1;
-
-    int baseLine;
-    int fontHeight = cv::getTextSize("0", fontFace, fontScale, fontThickness,
-                                     &baseLine).height;
-    int orgX = diagSample.frame.size().width / 25;
-    int orgY = diagSample.frame.size().height / 5;
-    int spaceY = diagSample.frame.size().height / 30;
-
-    if (diagSample.frame.channels() == 1) {
-        cv::cvtColor(diagSample.frame, diagSample.frame, cv::COLOR_GRAY2BGR);
-    }
-
-    // duration
-    cv::Point orgDuration(orgX, orgY);
-    std::stringstream ssDuration;
-    ssDuration << "duration: " << diagSample.motionDuration;
-    cv::putText(diagSample.frame, ssDuration.str(), orgDuration, fontFace,
-                fontScale, red, fontThickness);
-
-    // intensity
-    cv::Point orgIntensity(orgX, orgY + fontHeight + spaceY);
-    std::stringstream ssIntensity;
-    ssIntensity << "intensity: " << diagSample.motionIntensity;
-    cv::putText(diagSample.frame, ssIntensity.str(), orgIntensity, fontFace,
-                fontScale, red, fontThickness);
 }
 
 
@@ -317,10 +274,10 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
     bool succ = true;
     AVPacket* packetDecoder = nullptr;
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    std::cout << "Hit <ESC> to terminate video processing" << std::endl;
+    std::cout << getTimeStampMs() << " Send SIGUSR1 to PID " << getpid() << " to terminate 'motion'" << std::endl;
 
     //reader.playStream();
-    int packetsRead = 0;
+    // int packetsRead = 0;
     while (succ) {
 
         // free packetDecoder in detectMotion thread
@@ -342,19 +299,33 @@ bool processVideoStream(LibavReader& reader, PacketSafeQueue& decodeQueue, Packe
 
         preCaptureBuffer.push(packetPreCaptureBuffer);
 
-        // non-blocking getch
+        /* non-blocking getch
+        // cannot run as background process if connected to terminal input
+        // https://stackoverflow.com/questions/17621798/linux-process-in-background-stopped-in-jobs
         int pressedKey = rlutil::nb_getch();
         if (pressedKey == 27) {
             std::cout << std::endl << "<ESC> pressed, terminating video processing" << std::endl;
             appState.terminate = true;
             return false;
         }
+        */
+
+        // SIGUSR1 received
+        if (g_terminate) {
+            std::cout << std::endl << getTimeStampMs()
+                      << " SIGUSR1 received, terminating 'motion'" << std::endl;
+            appState.terminate = true;
+            return false;
+        }
+
+        /* DEBUG
         ++packetsRead;
         if (!(packetsRead % 1500)) {
             std::cout << getTimeStampMs() << " packets read: " << packetsRead << std::endl;
         }
+        */
     }
-    std::cout << "Video processing discontinued" << std::endl;
+    std::cout << getTimeStampMs() << " Video processing discontinued" << std::endl;
     return true;
 }
 
@@ -380,11 +351,11 @@ long long secondsWithoutError(State& appState)
 }
 
 
-void showDiagPics(std::vector<SensDiag>& diagPicBuffer)
+void sigHandler(int signum)
 {
-    for (auto diagSample : diagPicBuffer) {
-        auto idx = std::to_string(diagSample.preIdx);
-        cv::imshow("frame " + idx, diagSample.frame);
+    if (signum == SIGUSR1) {
+        //std::cout << "SIGUSR1 received" << std::endl;
+        g_terminate = 1;
     }
 }
 
@@ -392,20 +363,21 @@ void showDiagPics(std::vector<SensDiag>& diagPicBuffer)
 void terminateThreads(PacketSafeQueue& packetQueue, PacketSafeCircularBuffer& buffer, State& appState)
 {
     rlutil::setColor(rlutil::RED);
-    std::cout << "Terminate application"  << std::endl;
+    std::cout << getTimeStampMs() << " Terminate application"  << std::endl;
     rlutil::resetColor();
 
     appState.terminate = true;
 
-    std::cout << "Waiting for worker threads to join" << std::endl;
+    std::cout << getTimeStampMs() << " Waiting for worker threads to join"
+              << std::endl;
     packetQueue.terminate();
     appState.threadMotionDetection.join();
-    std::cout << "Motion detection thread joined" << std::endl;
+    std::cout << getTimeStampMs() << " Motion detection thread joined" << std::endl;
 
     appState.motion.startCnd.notify_one();
     buffer.terminate();
     appState.threadWritePackets.join();
-    std::cout << "Write packets thread joined" << std::endl;
+    std::cout << getTimeStampMs() << " Write packets thread joined" << std::endl;
 }
 
 
@@ -419,7 +391,7 @@ void waitForMotion(State& appState)
 }
 
 
-bool writeDiagPicsToDisk(std::vector<SensDiag>& diagBuf)
+bool writeDiagPicsToDisk(std::vector<MotionDiagPic>& diagBuf)
 {
     std::string dirDiag = getTimeStamp(TimeResolution::sec_NoBlank);
     if (cv::utils::fs::exists(dirDiag) && cv::utils::fs::isDirectory(dirDiag)) {
@@ -454,12 +426,11 @@ bool writeDiagPicsToDisk(std::vector<SensDiag>& diagBuf)
 int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 {
     DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", thread write packets started");
-    PerfCounter writeDiagPics("writeDiagPics");
     WriteState writeState = WriteState::open;
 
     LibavWriter writer;
     writer.init();
-    int postCapture = appState.motion.postCapture;
+    int postCapture = appState.detector.postCapture;
 
     while (!appState.terminate) {
         switch (writeState) {
@@ -480,14 +451,12 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
             }
 
             // write debug pics to disk
-            writeDiagPics.startCount();
             if (appState.debug) {
                 if (!writeDiagPicsToDisk(appState.motionDiag)) {
                     std::cout << "not able to save diag pics to disk at "
                         << getTimeStamp(TimeResolution::sec_NoBlank) << std::endl;
                 }
             }
-            writeDiagPics.stopCount();
 
             std::string fileName = getTimeStamp(TimeResolution::sec_NoBlank) + ".mp4";
             int ret = writer.open(fileName, appState.streamInfo);
@@ -544,7 +513,7 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
                     break;
                 // no motion -> writePostCapture (only if no reset)
                 } else if (appState.motion.stop) {
-                    postCapture = appState.motion.postCapture;
+                    postCapture = appState.detector.postCapture;
                     writeState = WriteState::close;
                     DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", write: motion.stop -> close");
                     break;
@@ -574,17 +543,39 @@ int writeMotionPackets(PacketSafeCircularBuffer& buffer, State& appState)
 
         } // end switch
     } // end while (!terminate)
-    writeDiagPics.printStatistics();
+
     return 0;
 }
 
 
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        std::cout << "usage: motion <videofile or stream>" << std::endl;
-        return -1;
+    std::signal(SIGUSR1, sigHandler);
+
+    QCoreApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("grzonka");
+    // settings file
+    // linux:   ~/.config/grzonka/motion.conf
+    // windows: HKEY_CURRENT_USER\Software\grzonka\tamper
+    Params params;
+
+    // parse command line args
+    QCommandLineParser cmdLine;
+    cmdLine.setApplicationDescription("Extract motion sequences of video stream to local disk");
+    cmdLine.addHelpOption();
+    QCommandLineOption roiOption(QStringList() << "r" << "roi", "show roi before processing files");
+    cmdLine.addOption(roiOption);
+    cmdLine.addPositionalArgument("rtsp://...", "Input video stream");
+
+    cmdLine.process(a);
+    const QStringList posArgs = cmdLine.positionalArguments();
+
+    if (posArgs.size() > 0) {
+
+    } else {
+        std::cout << "No input stream was specified" << std::endl;
+        cmdLine.showHelp();
     }
 
     avformat_network_init();
@@ -592,41 +583,49 @@ int main(int argc, const char *argv[])
     reader.init();
 
     // TODO check input stream before opening
-    int ret = reader.open(argv[1]);
+    std::string inputStream = posArgs.at(0).toStdString();
+    int ret = reader.open(inputStream);
     if (ret < 0) {
-        std::cout << "Error opening input: " << argv[1] << std::endl;
+        std::cout << getTimeStampMs() << " Error opening input: " << inputStream << std::endl;
         return -1;
     } else {
-        std::cout << "Video input opened successfully: "  << argv[1] << std::endl;
+        std::cout << getTimeStampMs() << " Open video input: "  << inputStream << std::endl;
     }
 
     // prepare for motion detection thread
     // TODO refactor State as class with initializing valid state
     State appState;
-    appState.detector.bgrSubThreshold = 40;     // foreground / background gray difference
-    appState.detector.minMotionDuration = 30;   // consecutive frames
-    appState.detector.minMotionIntensity = 80;  // pixels
+
+    // foreground / background gray difference
+    appState.detector.bgrSubThreshold = params.detector.bgrSubThreshold;
+
+    // consecutive frames
+    appState.detector.minMotionDuration = params.detector.minMotionDuration;
+
+    // pixels
+    appState.detector.minMotionIntensity = params.detector.minMotionIntensity;
+
+    // frames
+    appState.detector.postCapture = params.detector.postCapture;
 
     appState.motion.start = false; // needs lock, if detection thread is already running
     appState.motion.stop = true;
     appState.motion.writeInProgress = false;
-    appState.motion.postCapture = 25;
 
     appState.reset = false;
     appState.resetDone = false;
     appState.terminate = false;
 
     if (!reader.getVideoStreamInfo(appState.streamInfo)) {
-        std::cout << "Failed to get video stream info" << std::endl;
+        std::cout << getTimeStampMs() << "Failed to get video stream info" << std::endl;
         return -1;
     }
     appState.errorCount = 0;
     appState.timeLastError = std::chrono::system_clock::now();
-    appState.debug = true;
 
     PacketSafeQueue decodeQueue;
-    appState.threadMotionDetection = std::thread(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));
-    // std::thread threadMotionDetection(detectMotionCnd, std::ref(decodeQueue), std::ref(appState));
+    appState.threadMotionDetection = std::thread(detectMotion, std::ref(decodeQueue), std::ref(appState));
+    // std::thread threadMotionDetection(detectMotion, std::ref(decodeQueue), std::ref(appState));
 
     PacketSafeCircularBuffer preCaptureBuffer(100);
     appState.threadWritePackets = std::thread(writeMotionPackets, std::ref(preCaptureBuffer), std::ref(appState));
@@ -637,29 +636,25 @@ int main(int argc, const char *argv[])
         if (!reader.isOpen()) {
             ret = -1;
             while (ret) {
-                ret = reader.open(argv[1]);
+                ret = reader.open(inputStream);
 
                 // keep trying to connect
-                if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH)) {
-                    int remainingSeconds = 15;
-                    while (remainingSeconds) {
-                        std::cout << "Connection timed out, trying to re-connect in"
-                                  << std::setw(3) << --remainingSeconds << " sec" << "\r";
-                        std::cout.flush();
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                    }
-                    std::cout << "Re-connecting ...                                      " << std::endl;
+                // 2021-11-11 also for invalid data (for test purposes)
+                // if (ret == AVERROR(ETIMEDOUT) || ret == AVERROR(ENETUNREACH) || ret == AVERROR_INVALIDDATA) {
+                // keep trying to connect for all errors
+                if (ret < 0) {
+                    int timeout = 30;
+                    std::cout << getTimeStampMs() << " Open input error (" << ret
+                              << "), trying to re-connect in " << timeout << " sec" << std::endl;
+                    std::this_thread::sleep_for(std::chrono::seconds(timeout));
                     continue;
-                // terminate application for any other error
-                } else if (ret < 0) {
-                    std::cout << "Failed to open input: "  << argv[1] << std::endl;
-                    terminateThreads(decodeQueue, preCaptureBuffer, appState);
-                    return -1;
                 }
             }
-            std::cout << "Video input opened successfully: "  << argv[1] << std::endl;
+            std::cout << getTimeStampMs() << " Video input opened successfully: "
+                      << inputStream << std::endl;
             if (!reader.getVideoStreamInfo(appState.streamInfo)) {
-                std::cout << "Failed to get video stream info" << std::endl;
+                std::cout << getTimeStampMs() << " Failed to get video stream info"
+                          << std::endl;
                 terminateThreads(decodeQueue, preCaptureBuffer, appState);
                 return -1;
             }
@@ -675,17 +670,26 @@ int main(int argc, const char *argv[])
         appState.motion.startCnd.notify_one(); // notifies waitForMotion in order to get resetDone notification
 
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waiting for resetDone");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", waiting for resetDone" << std::endl;
         std::unique_lock<std::mutex> lockReset(appState.resetDoneMtx);
         appState.resetDoneCnd.wait(lockReset, [&]{return(appState.resetDone);});
         appState.resetDone = false;
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", resetDone triggered");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", resetDone triggered" << std::endl;
 
         reader.close();
         DEBUG(getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reader closed");
+        // DEBUG TODO DELETE
+        std::cout << getTimeStampMs() << " " << __func__ << " #" << __LINE__<< ", reader closed" << std::endl;
 
-        // TODO inc failcount, measure fail time
-        std::cout << "Reading errors: " << ++appState.errorCount << ", seconds since last error: "
-                  << secondsWithoutError(appState) << std::endl;
+        std::cout << getTimeStampMs() << " Reading errors: " << ++appState.errorCount
+                  << ", seconds since last error: " << secondsWithoutError(appState) << std::endl;
+        int timeoutReset = 30;
+        std::cout << getTimeStampMs() << " Buffers have been reset, trying to re-connect in "
+                  << timeoutReset << " sec" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(timeoutReset));
     }
 
     terminateThreads(decodeQueue, preCaptureBuffer, appState);

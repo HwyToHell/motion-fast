@@ -5,7 +5,7 @@
 #include <sstream>
 
 // defined in motion-fast
-bool createDiagPics(CircularBuffer<SensDiag>& diagBuf, std::vector<SensDiag>& diagPicBuffer);
+bool createDiagPics(CircularBuffer<MotionDiagPic>& diagBuf, std::vector<MotionDiagPic>& diagPicBuffer);
 
 
 void printFrameNum(cv::Mat& frame, int num)
@@ -34,7 +34,7 @@ void printParams(cv::VideoCapture& vidCap) {
 }
 
 
-void showDiag(std::vector<SensDiag>& diag)
+void showDiag(std::vector<MotionDiagPic>& diag)
 {
     if (diag.size() == 0) {
         std::cout << "no diag images available" << std::endl;
@@ -91,8 +91,8 @@ int main_show_diag_pics(int argc, const char *argv[])
     // printParams(cap);
     // return 0;
 
-    std::vector<SensDiag>       motionDiag;
-    CircularBuffer<SensDiag>    diagBuffer(31);
+    std::vector<MotionDiagPic>       motionDiag;
+    CircularBuffer<MotionDiagPic>    diagBuffer(31);
     cv::Mat frame, gray;
     std::cout << "Hit ESC to break" << std::endl;
 
@@ -120,7 +120,7 @@ int main_show_diag_pics(int argc, const char *argv[])
         bool isMotion = detector.isContinuousMotion(gray);
 
         // buffer last frame for diagnostics
-        SensDiag sd;
+        MotionDiagPic sd;
         sd.frame = detector.processedFrame().clone();
         sd.motion = detector.motionMask().clone();
         sd.motionDuration = detector.motionDuration();

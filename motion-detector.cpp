@@ -1,10 +1,8 @@
 #include "motion-detector.h"
 
-MotionDetector::MotionDetector() :
-    m_perfPre("pre-process"),
-    m_perfApply("bgrSub"),
-    m_perfPost("cntNonZero"),
 
+// CLASS IMPLEMENTATION
+MotionDetector::MotionDetector() :
     m_isContinuousMotion{false},
     m_minMotionDuration{10},    // number of consecutive frames with motion
     m_minMotionIntensity{100},  // number of pixels with motion
@@ -43,7 +41,6 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
         m_roi = cv::Rect(cv::Point(0,0), frame.size());
 
     // pre-processing of clipped frame
-    m_perfPre.startCount();
     /* performance for pre-processing HD frame on RPi:
      * blur10x10: 20ms      bgrSub: 25ms
      * resize0.5:  2ms      bgrSub:  5ms
@@ -56,15 +53,10 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
     if (kernel == 0) kernel = 2;
     cv::blur(m_resizedFrame, m_processedFrame, cv::Size(kernel,kernel));
 
-    m_perfPre.stopCount();
-
     // detect motion in current frame
-    m_perfApply.startCount();
     //m_bgrSub->apply(m_resizedFrame, m_motionMask);
     m_bgrSub->apply(m_processedFrame, m_motionMask);
 
-    m_perfApply.stopCount();
-    m_perfPost.startCount();
     m_motionIntensity = cv::countNonZero(m_motionMask);
     bool isMotion = m_motionIntensity > m_minMotionIntensity ? true : false;
 
@@ -101,7 +93,6 @@ bool MotionDetector::hasFrameMotion(cv::Mat frame)
         m_motionDuration = m_motionDuration <= 0
                 ? 0 : m_motionDuration;
     }
-    m_perfPost.stopCount();
 
     return isMotion;
 }
@@ -188,7 +179,88 @@ void MotionDetector::roi(cv::Rect value)
 }
 
 
-cv::Rect MotionDetector::roi() const
+cv::Rect MotionDetector::roi() constdx -> reverse index of circul            // preIdx -> reverse index of circular buffer (head = oldest index)
+            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
+            // std::cout << "pre idx: " << preIdx << std::endl;
+            diagBuf.at(idxRingBuf).preIdx = preIdx;
+
+            printDetectionParams(diagBuf.at(idxRingBuf));
+            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
+        }
+        return true;
+    }
+}
+
+            size_t idxRingBuf = (n * idxSteps);
+
+            // preIdx -> reverse index of circular buffer (head = oldest index)
+            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
+            // std::cout << "pre idx: " << preIdx << std::endl;
+            diagBuf.at(idxRingBuf).preIdx = preIdx;
+
+            printDetectionParams(diagBuf.at(idxRingBuf));
+            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
+        }
+        return true;
+    }
+}
+
+
+void printDetectionParams(MotionDiagPic& 
+void printDetectionParams(MotionDiagPic& 
+            // preIdx -> reverse index of circular buffer (head = oldest index)
+            int preIdx = - static_cast<int>((diagBuf.size() - 1) - (n * idxSteps));
+            // std::cout << "pre idx: " << preIdx << std::endl;
+            diagBuf.at(idxRingBuf).preIdx = preIdx;
+
+            printDetectionParams(diagBuf.at(idxRingBuf));
+            diagPicBuffer.push_back(diagBuf.at(idxRingBuf));
+        }
+        return true;
+    }
+}
+
+
+void printDetectionParams(MotionDiagPic& diagSample)
 {
-    return m_roi;
+    const cv::Scalar blue(255,0,0);
+    const cv::Scalar green(0,255,0);
+    const cv::Scalar red(0,0,255);
+    int fontFace = cv::HersheyFonts::FONT_HERSHEY_SIMPLEX;
+    double fontScale = static_cast<double>(diagSample.frame.size().height) / 500;
+    int fontThickness = 1;
+
+    int baseLine;
+    int fontHeight = cv::getTextSize("0", fontFace, fontScale, fontThickness,
+                                     &baseLine).height;
+    int orgX = diagSample.frame.size().width / 25;
+    int orgY = diagSample.frame.size().height / 5;
+    int spaceY = diagSample.frame.size().height / 30;
+
+    if (diagSample.frame.channels() == 1) {
+        cv::cvtColor(diagSample.frame, diagSample.frame, cv::COLOR_GRAY2BGR);
+    }
+
+    // duration
+    cv::Point orgDuration(orgX, orgY);
+    std::stringstream ssDuration;
+    ssDuration << "duration: " << diagSample.motionDuration;
+    cv::putText(diagSample.frame, ssDuration.str(), orgDuration, fontFace,
+                fontScale, red, fontThickness);
+
+    // intensity
+    cv::Point orgIntensity(orgX, orgY + fontHeight + spaceY);
+    std::stringstream ssIntensity;
+    ssIntensity << "intensity: " << diagSample.motionIntensity;
+    cv::putText(diagSample.frame, ssIntensity.str(), orgIntensity, fontFace,
+                fontScale, red, fontThickness);
+}
+
+
+void showDiagPics(std::vector<MotionDiagPic>& diagPicBuffer)
+{
+    for (auto diagSample : diagPicBuffer) {
+        auto idx = std::to_string(diagSample.preIdx);
+        cv::imshow("frame " + idx, diagSample.frame);
+    }
 }

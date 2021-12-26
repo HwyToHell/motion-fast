@@ -1,0 +1,26 @@
+2021-11-28 14:14:12 No 'upload-videos' instance running, start new one
+2021-11-28 14:14:13 Script 'upload-videos.py' started, send SIGUSR1 to PID 9957 to terminate
+2021-11-28 14:14:13 Monitoring directory /home/holger/temp for new video files
+2021-11-28 14:14:13 Removing files prior to 2021-11-23 00:00:00
+2021-11-28 14:14:14 All files removed
+2021-11-28 14:14:37 Video file /home/holger/temp/2021-11-03_23h11m54s.mp4 queued for uploading
+2021-11-28 14:14:38 Video file /home/holger/temp/2021-11-04_03h01m04s.mp4 queued for uploading
+2021-11-28 14:14:44 Trying to upload: 2021-11-03_23h11m54s.mp4
+2021-11-28 14:14:51 Upload successful: 2021-11-03_23h11m54s.mp4
+2021-11-28 14:14:51 Trying to upload: 2021-11-04_03h01m04s.mp4
+2021-11-28 14:14:53 Upload successful: 2021-11-04_03h01m04s.mp4
+2021-11-28 14:16:06 SIGUSR1 to 'upload-videos' process (PID 9957) sent, wait for finish
+2021-11-28 14:16:06 SIGUSR1 received, terminate 'upload-videos.py'
+2021-11-28 14:16:07 Files left for upload: 0
+
+2021-11-28 14:16:10 Instance of 'upload-videos' has finished, restart
+2021-11-28 14:16:11 Script 'upload-videos.py' started, send SIGUSR1 to PID 10034 to terminate
+2021-11-28 14:16:11 Monitoring directory /home/holger/temp for new video files
+2021-11-28 14:16:11 Removing files prior to 2021-11-23 00:00:00
+2021-11-28 14:16:12 All files removed
+2021-11-28 14:16:33 Video file /home/holger/temp/2021-11-04_16h42m21s.mp4 queued for uploading
+2021-11-28 14:16:41 Trying to upload: 2021-11-04_16h42m21s.mp4
+2021-11-28 14:16:52 Upload successful: 2021-11-04_16h42m21s.mp4
+2021-11-28 14:17:33 SIGUSR1 received, terminate 'upload-videos.py'
+2021-11-28 14:17:34 Files left for upload: 0
+

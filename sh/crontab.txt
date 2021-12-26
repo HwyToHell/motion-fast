@@ -1,0 +1,4 @@
+on rpi4-60
+
+00 03 * * * /home/pi/bin/restart-motion.sh >> /home/pi/motion.log 2>&1
+

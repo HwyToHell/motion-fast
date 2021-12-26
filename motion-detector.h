@@ -1,6 +1,7 @@
 #ifndef MOTIONDETECTOR_H
 #define MOTIONDETECTOR_H
 #include "backgroundsubtraction.h"
+#include "circularbuffer.h"
 #include "perfcounter.h"
 
 #include <opencv2/opencv.hpp>
@@ -15,11 +16,25 @@ enum class Duration {frames, seconds};
 
 
 // CLASSES
+struct DetectorParams
+{
+    double      bgrSubThreshold;
+    int         minMotionDuration;
+    int         minMotionIntensity;
+    int         postCapture; // preCapture determined by key frame distance
+    int         preCapture;  // reseved for future usage
+    cv::Rect    roi;
+    double      scaleFrame;
+    bool        debug;
+    char        avoidPaddingWarning1[7];
+};
+
+
 class MotionDetector
 {
 public:
     MotionDetector();
-    /* background subtractor: theshold of frame difference */
+    /* background subtractor: threshold of frame difference */
     void        bgrSubThreshold(double threshold);
     double      bgrSubThreshold() const;
     bool        hasFrameMotion(cv::Mat frame);
@@ -28,7 +43,9 @@ public:
     void        minMotionDuration(int value);
     int         minMotionDuration() const;
     int         motionDuration() const;
-    /* area in per cent of frame area */
+    /* intensity area as pixels
+     * TODO: as per cent of frame area
+     */
     void        minMotionIntensity(int value);
     int         minMotionIntensity() const;
     int         motionIntensity() const;
@@ -39,11 +56,6 @@ public:
     /* region of interest related to upper left corner */
     void        roi(cv::Rect);
     cv::Rect    roi() const;
-    PerfCounter m_perfPre;
-    PerfCounter m_perfApply;
-    PerfCounter m_perfPost;
-
-
     // TODO reset backgroundsubtractor
 private:
     cv::Ptr<BackgroundSubtractorLowPass> m_bgrSub;
@@ -59,7 +71,7 @@ private:
 };
 
 
-struct SensDiag
+struct MotionDiagPic
 {
     cv::Mat frame;
     cv::Mat motion;
@@ -67,6 +79,14 @@ struct SensDiag
     int     motionIntensity;
     int     preIdx;
 };
+
+
+
+// FUNCTIONS
+bool createDiagPics(CircularBuffer<MotionDiagPic>& diagBuf, std::vector<MotionDiagPic>& diagPicBuffer);
+void printDetectionParams(MotionDiagPic& diagSample);
+void showDiagPics(std::vector<MotionDiagPic>& diagPicBuffer);
+
 
 
 #endif // MOTIONDETECTOR_H
