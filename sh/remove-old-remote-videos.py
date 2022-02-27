@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # with this shebang the script name shows up in process list,
-# if run from command line as ./upload-videos.py
+# if run from command line as ./remove-old-remote-videos.py
 # 
 # usage: remove-old-remote-videos.py <path-to-credentials>
  
